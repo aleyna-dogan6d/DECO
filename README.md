@@ -53,6 +53,8 @@ There is also a **prototype** "My field" profile page (see below). The steps bel
 **"My field" profile (prototype).** A farmer can save the selected field and the current rotation, see the
 highest-scoring card for the saved field ("Our suggestion for this year": the same rule-based engine run again,
 not a forecast), and keep a short monthly field note (date, how the soil feels: dry / normal / wet, free text).
+The page is laid out as a small dashboard (four figures at the top, then cards for the saved field, the suggestion
+and the notes); it is written with the site's own CSS, no UI framework is loaded.
 There is no account, no password and no e-mail. The profile stays in the browser and can be deleted with one button.
 The notes are not used in any calculation yet. **To look at it quickly, open "My field" and press "Try a demo
 profile":** one click loads a ready-made example (Konya, wheat + fallow, three notes marked "Sample"); the demo data
@@ -75,6 +77,7 @@ OpenStreetMap's Nominatim.
 | Temperature | `MERRA2_2m_Air_Temperature_Monthly` | 2001–2026 | Monthly air temperature |
 | Groundwater | `GRACE_Tellus_Liquid_Water_Equivalent_Thickness_Mascon_CRI` | 2002–2022 | Water stored on and under the ground, compared with normal |
 | Base map | `OSM_Land_Water_Map`, `Reference_Features`, `Reference_Labels` | – | Land/water background, borders, place names |
+| Picture on the About page | `MODIS_Terra_CorrectedReflectance_TrueColor` (GIBS WMS) | 20 July 2026 | One true-colour picture of the Konya plain, Türkiye; for illustration only |
 
 Layer names and dates were checked against the GIBS catalogue on 14 November 2026. Legend colours are sampled
 from the official GIBS colour-map files.
@@ -191,6 +194,9 @@ None of these is done yet (the same list is on the About page):
   - `GRACE_Tellus_Liquid_Water_Equivalent_Thickness_Mascon_CRI` (GRACE Tellus) – "Groundwater" layer.
   - `OSM_Land_Water_Map`, `Reference_Features`, `Reference_Labels` – base map, borders and place names
     (served by GIBS; the underlying map data are © OpenStreetMap contributors).
+  - `MODIS_Terra_CorrectedReflectance_TrueColor` (MODIS/Terra true colour), requested once through the GIBS WMS
+    endpoint (https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi; layer name checked in its
+    GetCapabilities document on 15 November 2026) – the picture of the Konya plain on the About page.
 - **NASA POWER – Prediction Of Worldwide Energy Resources** (NASA Langley Research Center):
   https://power.larc.nasa.gov/ — monthly point climate data, 2001–2024; parameters `T2M`, `T2M_MIN`,
   `PRECTOTCORR`, `T2M_RANGE`, `TOA_SW_DWN` (see the table above for what each is used for).

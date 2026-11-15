@@ -749,3 +749,74 @@ h2.mid { margin: 36px 0 8px; font-size: 22px; font-weight: 800; letter-spacing: 
   .nums { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
   .nums b { font-size: 30px; }
 }
+
+/* ---------- Tasarım (ekip kararı, 15 Kasım 2026): Tarladan sayfası ortalı ve ızgaralı; Hakkımızda'da NASA GIBS görüntüsü ---------- */
+.band > .wrap { max-width: 1040px; margin-left: auto; margin-right: auto; }
+.page-hero { padding-top: 52px; padding-bottom: 46px; }
+.page-hero .lead { margin-bottom: 6px; font-weight: 700; }
+.page-hero-text { max-width: 640px; color: #dfe9e3; }
+.farmers-body { border-top: 0; padding-top: 34px; }
+.farmers-body .example-note { margin-top: 0 !important; }
+.example-cards { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.example-card { display: flex; flex-direction: column; padding: 16px; border-top: 4px solid var(--green-deep); }
+.example-who { margin-bottom: 4px !important; font-size: 16px; }
+.example-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 10px !important; font-size: 13.5px; font-weight: 600; color: var(--muted); }
+.example-meta svg { width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px; color: var(--green-deep); }
+.farmers-body .empty-box { margin-top: 26px; text-align: center; }
+.rule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.rule-grid li { position: relative; padding: 12px 14px 12px 40px; border: 1px solid rgba(22, 33, 27, .2); background: var(--card); font-size: 15px; line-height: 1.45; }
+.rule-grid li::before { content: "✓"; position: absolute; left: 14px; top: 11px; font-weight: 800; color: var(--green-deep); }
+/* Hakkımızda: giriş solda, görüntü sağda (telefonda görüntü metnin altında) */
+.band-first > .about-top { max-width: 1180px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px; align-items: start; }
+.about-figure { margin: 0; }
+.about-img { aspect-ratio: 16 / 9; overflow: hidden; border: 2px solid var(--ink); background: #dfe6e2; }
+.about-img img { display: block; width: 100%; height: 100%; object-fit: cover; padding: 0; color: var(--muted); font-size: 14px; }
+.about-figure figcaption { margin-top: 8px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+@media (max-width: 860px) {
+  .page-hero { padding-top: 34px; padding-bottom: 30px; }
+  .farmers-body { padding-top: 24px; }
+  .band-first > .about-top { grid-template-columns: 1fr; gap: 18px; }
+}
+
+/* ---------- Tarla profili: gösterge paneli ("Field dashboard"; ekip kararı, 15 Kasım 2026) ----------
+   Görünüm olarak AdminLTE v3 panosu örnek alındı (üstte istatistik kutuları, başlıklı kartlar, iki sütun). Bootstrap, jQuery
+   ya da AdminLTE dosyası EKLENMEDİ; yalnızca sitenin kendi CSS'i ve renkleri. Yalnızca #profile sayfasında kullanılır. */
+#pageProfile .band-first > #profileBody.dash { max-width: 1180px; }
+.dash-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0 0 16px; }
+.dash-stat { position: relative; overflow: hidden; min-height: 108px; padding: 12px 14px; border-radius: 4px; color: #fff; box-shadow: 0 1px 3px rgba(22, 33, 27, .25); }
+.dash-stat b { display: block; font-size: 30px; font-weight: 800; line-height: 1.2; letter-spacing: -.5px; }
+.dash-stat .st-label { display: block; margin-top: 4px; font-size: 14px; font-weight: 700; line-height: 1.3; }
+.dash-stat .st-sub { display: block; margin-top: 2px; font-size: 12.5px; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-stat svg { position: absolute; right: 10px; top: 10px; width: 56px; height: 56px; opacity: .2; }
+.st-green { background: var(--green); }
+.st-bordo { background: var(--header); }
+.st-yellow { background: var(--fallow); color: var(--ink); }
+.st-dark { background: var(--ink); color: var(--header-text); }
+.st-date b { font-size: 22px; line-height: 1.64; letter-spacing: -.3px; }
+.dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.dash-col { display: grid; gap: 16px; min-width: 0; }
+.dash-card { min-width: 0; border: 1px solid rgba(22, 33, 27, .22); border-top: 3px solid var(--green-deep); border-radius: 4px; background: var(--card); box-shadow: 0 1px 3px rgba(22, 33, 27, .12); }
+.dash-card-title { margin: 0; padding: 10px 14px; border-bottom: 1px solid rgba(22, 33, 27, .16); font-size: 17px; font-weight: 800; letter-spacing: -.2px; }
+.dash-card-body { padding: 14px; }
+.dash-card-body > :first-child { margin-top: 0; }
+.dash-card-body > :last-child { margin-bottom: 0; }
+.dash-delete { border-top-color: #b3261e; }
+.dash-card .profile-card, .dash-card .profile-form { max-width: none; }
+.dash-card .profile-facts { margin-top: 0; }
+/* Notlar zaman çizelgesi gibi: solda çizgi, her notta bir nokta */
+.dash-card .profile-notes { margin-left: 6px; padding-left: 18px; border-left: 3px solid rgba(22, 33, 27, .18); }
+.dash-card .profile-note { position: relative; padding: 0 0 14px; border-bottom: 0; }
+.dash-card .profile-note::before { content: ""; position: absolute; left: -27.5px; top: 4px; width: 12px; height: 12px; border: 2px solid var(--card); border-radius: 50%; background: var(--green-deep); }
+@media (max-width: 860px) {
+  .dash-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dash-stat { min-height: 96px; padding: 10px 12px; }
+  .dash-stat b { font-size: 24px; }
+  .st-date b { font-size: 17px; line-height: 1.7; }
+  .dash-stat svg { width: 44px; height: 44px; }
+  .dash-grid { display: flex; flex-direction: column; gap: 12px; }
+  .dash-col { display: contents; }
+  .dash-field { order: 1; }
+  .dash-advice { order: 2; }
+  .dash-notes { order: 3; }
+  .dash-delete { order: 4; }
+}

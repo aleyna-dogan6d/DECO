@@ -20,6 +20,14 @@ const PROFILE_DEMO = {
 // Örnek notlar: [kaç gün önce, toprak nemi hissi]; metinler dile göre gösterilir
 const PROFILE_DEMO_NOTES = [[6, "normal"], [34, "dry"], [62, "dry"]];
 
+// İstatistik kutularındaki simgeler (elle çizilmiş SVG; hazır simge kütüphanesi kullanılmaz)
+const PROFILE_ICONS = {
+  bars: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21h20M5 21V11M11 21V4M17 21v-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  leaf: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c5-3 8-7 8-12a8 8 0 0 0-16 0c0 5 3 9 8 12z" fill="currentColor"/></svg>',
+  note: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h7M9 16h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v5M16 3v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
 const Profile = {
   data: null,           // { v, name, field: { lat, lng, name }, answers, created, notes: [{ id, date, moisture, text }] }
   stored: true,         // tarayıcı kayda izin verdi mi (özel sekmede vermeyebilir)
@@ -80,9 +88,10 @@ const Profile = {
     return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
   },
 
-  dateText(iso) {
-    const [y, m, d] = iso.split("-").map(Number);
-    return `${d} ${t("months")[m - 1]} ${y}`;
+  // "9 Kasım 2026"; short verilirse ay üç harfle ("9 Kas 2026"; dar istatistik kutusu için)
+  dateText(iso, short = false) {
+    const [y, m, d] = iso.split("-").map(Number), month = t("months")[m - 1];
+    return `${d} ${short ? month.slice(0, 3) : month} ${y}`;
   },
 
   // Profil oluşturmak için plan ekranında gerekenler: seçili tarla + tamamlanmış rotasyon + toprak/su/eğim yanıtları
@@ -184,6 +193,7 @@ const Profile = {
     if (!box) return;
     const P = t("profile");
     box.innerHTML = "";
+    box.classList.toggle("dash", Boolean(this.data)); // kayıtlı profil varken gösterge paneli düzeni (daha geniş, iki sütun)
     if (!this.data) return this.renderCreate(box, P);
 
     const p = this.data;
@@ -192,20 +202,26 @@ const Profile = {
     // Örnek profilde verilerin örnek olduğu en üstte açıkça yazılır
     if (p.demo) this.add(box, "p", "profile-demo-note", P.demoNotice).id = "profileDemoNote";
 
-    // Kayıtlı tarla ve rotasyon
-    this.add(box, "h2", "mid", p.demo ? P.demoTitle : p.name ? P.savedTitleName(p.name) : P.savedTitle);
-    this.factList(box, p.field, p.answers);
-    if (p.created) this.add(box, "p", "profile-fine", P.created(this.dateText(p.created)));
+    // ---- Gösterge paneli ("Field dashboard") ----
+    // Görünüm olarak AdminLTE v3 panosu örnek alındı (üstte istatistik kutuları, başlıklı kartlar, iki sütun);
+    // Bootstrap, jQuery ya da AdminLTE dosyası EKLENMEDİ: yalnızca sitenin kendi CSS'i (css/style.css, .dash-*).
+    this.add(box, "div", "dash-stats").id = "profileStats"; // içerik: renderStats()
+    const grid = this.add(box, "div", "dash-grid");
+    const left = this.add(grid, "div", "dash-col"), right = this.add(grid, "div", "dash-col");
 
-    // Bu yıl için önerimiz
-    this.add(box, "h2", "mid", P.adviceTitle);
-    this.add(box, "div", "", undefined).id = "profileAdvice";
+    // Kart: kayıtlı tarla ve rotasyon
+    const fieldBody = this.card(left, "dash-field", p.demo ? P.demoTitle : p.name ? P.savedTitleName(p.name) : P.savedTitle);
+    this.factList(fieldBody, p.field, p.answers);
+    if (p.created) this.add(fieldBody, "p", "profile-fine", P.created(this.dateText(p.created)));
+
+    // Kart: bu yıl için önerimiz
+    this.card(right, "dash-advice", P.adviceTitle).id = "profileAdvice";
     this.renderAdvice();
 
-    // Aylık tarla notu
-    this.add(box, "h2", "mid", P.noteTitle);
-    this.add(box, "p", "", P.noteLead);
-    const form = this.add(box, "form", "profile-form");
+    // Kart: aylık tarla notu (form + zaman çizelgesi görünümünde not listesi)
+    const noteBody = this.card(left, "dash-notes", P.noteTitle);
+    this.add(noteBody, "p", "", P.noteLead);
+    const form = this.add(noteBody, "form", "profile-form");
     form.id = "profileNoteForm";
     form.noValidate = true;
     const dateLabel = this.add(form, "label", "profile-label", P.noteDate);
@@ -228,15 +244,64 @@ const Profile = {
     const save = this.add(form, "button", "btn btn-primary", P.noteSave);
     save.type = "submit";
 
-    const listBox = this.add(box, "div", "");
+    const listBox = this.add(noteBody, "div", "");
     listBox.id = "profileNotes";
     this.renderNotes();
 
-    // Profili sil (iki adımlı: önce sor, sonra sil)
-    this.add(box, "h2", "mid", P.deleteTitle);
-    const del = this.add(box, "div", "profile-delete");
+    // Kart: profili sil (iki adımlı: önce sor, sonra sil)
+    const del = this.card(right, "dash-delete", P.deleteTitle);
+    del.classList.add("profile-delete");
     del.id = "profileDelete";
     this.renderDelete();
+    this.renderStats();
+  },
+
+  // Başlıklı kart: gövdesini döndürür
+  card(parent, cls, title) {
+    const c = this.add(parent, "section", `dash-card ${cls}`);
+    this.add(c, "h2", "dash-card-title", title);
+    return this.add(c, "div", "dash-card-body");
+  },
+
+  // Kayıtlı tarla için en yüksek puanlı kart: kartta görünen (bir ondalığa yuvarlanmış) puana göre; eşitlikte çiftçinin kendi rotasyonu
+  pick(a) {
+    const tenth = v => Math.round(v * 10);
+    const cur = { ev: a.result.current, option: null, plain: true };
+    let best = cur;
+    a.result.options.forEach(o => { if (tenth(o.ev.total) > tenth(best.ev.total)) best = { ev: o.ev, option: o, plain: true }; });
+    return { cur, best };
+  },
+
+  // Üstteki dört istatistik kutusu: mevcut rotasyonun puanı, önerilen rotasyonun puanı, not sayısı, son not.
+  // Puanlar "Bu yıl için önerimiz" kartındaki kural tabanlı karşılaştırmanın aynısıdır (yeni bir hesap değil).
+  renderStats() {
+    const box = el("profileStats");
+    if (!box || !this.data) return;
+    const P = t("profile"), a = this.advice, notes = this.data.notes, last = notes[0];
+    let cur = "…", best = "…", curName = "", bestName = "";
+    if (a && a.state === "ready") {
+      const pk = this.pick(a);
+      cur = `${fmt(pk.cur.ev.total, 1)} / 5`;
+      best = `${fmt(pk.best.ev.total, 1)} / 5`;
+      curName = Cards.title(pk.cur.ev.tl);
+      bestName = pk.best === pk.cur ? P.statSame : Cards.title(pk.best.ev.tl);
+    } else if (a && a.state === "error") {
+      cur = best = "–";
+    }
+    const items = [
+      ["st-green", cur, P.statCurrent, curName, PROFILE_ICONS.bars],
+      ["st-bordo", best, P.statBest, bestName, PROFILE_ICONS.leaf],
+      ["st-yellow", String(notes.length), P.statNotes, "", PROFILE_ICONS.note],
+      ["st-dark st-date", last ? this.dateText(last.date, true) : "–", P.statLast, last ? P.moisture[last.moisture] : "", PROFILE_ICONS.calendar]
+    ];
+    box.innerHTML = "";
+    items.forEach(([cls, value, label, sub, icon]) => {
+      const s = this.add(box, "div", `dash-stat ${cls}`);
+      s.innerHTML = icon; // sabit SVG (elle çizilmiş simge)
+      this.add(s, "b", "", value);
+      this.add(s, "span", "st-label", label);
+      this.add(s, "span", "st-sub", sub);
+    });
   },
 
   // Profil yokken: neye yaradığı + (plan ekranında tarla ve rotasyon varsa) oluşturma formu
@@ -298,6 +363,7 @@ const Profile = {
     if (!box) return;
     const P = t("profile"), a = this.advice;
     box.innerHTML = "";
+    this.renderStats(); // üstteki puan kutuları da aynı sonuçtan yazılır
     if (!a || a.state === "loading") { this.add(box, "p", "profile-status", t("loadingClimate")); return; }
     if (a.state === "error") {
       this.add(box, "p", "profile-status", t("climateError"));
@@ -305,11 +371,7 @@ const Profile = {
       retry.type = "button"; retry.dataset.act = "retry";
       return;
     }
-    // En yüksek puanlı kart: kartta görünen (bir ondalığa yuvarlanmış) puana göre; eşitlikte çiftçinin kendi rotasyonu
-    const tenth = v => Math.round(v * 10);
-    const cur = { ev: a.result.current, option: null, plain: true };
-    let best = cur;
-    a.result.options.forEach(o => { if (tenth(o.ev.total) > tenth(best.ev.total)) best = { ev: o.ev, option: o, plain: true }; });
+    const { cur, best } = this.pick(a);
     const curScore = fmt(cur.ev.total, 1);
     this.add(box, "p", "profile-advice-line", best === cur
       ? (a.result.options.length ? P.adviceKeep(curScore) : P.adviceOnly(curScore))
@@ -329,7 +391,7 @@ const Profile = {
     const P = t("profile"), notes = this.data.notes;
     box.innerHTML = "";
     this.add(box, "h3", "profile-notes-title", P.notesTitle(notes.length));
-    if (!notes.length) { this.add(box, "p", "profile-fine", P.notesEmpty); return; }
+    if (!notes.length) { this.add(box, "p", "profile-fine", P.notesEmpty); this.renderStats(); return; }
     const ul = this.add(box, "ul", "profile-notes");
     notes.forEach(n => {
       const li = this.add(ul, "li", "profile-note");
@@ -343,6 +405,7 @@ const Profile = {
       const text = sample ? P.demoNotes[n.sample] : n.text;
       if (text) this.add(li, "p", "profile-note-text", text);
     });
+    this.renderStats(); // not sayısı ve son not kutuları
   },
 
   renderDelete() {

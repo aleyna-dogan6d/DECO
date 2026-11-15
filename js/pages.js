@@ -13,13 +13,16 @@ const COMMENT_FORM_URL = "";
 // üstteki not ve her karttaki "örnek" etiketi arayüz metnidir ve dile göre değişir (js/i18n.js: farmersExampleNote,
 // farmersExampleLabel). Gerçek kişi adı ve fotoğraf YOK. Metinler ekibin verdiği hâliyle; değiştirmeden önce sor.
 const FARMER_EXAMPLES = [
-  { who: "Example farmer — Konya, Türkiye · Wheat → Fallow",
+  { who: "Example farmer", place: "Konya, Türkiye", rotation: "Wheat → Fallow",
     text: "The idea of lentils instead of a fallow year caught my eye. I'd like to try it on a small plot first and ask my adviser about seed." },
-  { who: "Example farmer — Ludhiana, India · Rice → Wheat",
+  { who: "Example farmer", place: "Ludhiana, India", rotation: "Rice → Wheat",
     text: "The water-saving card matters most to me; groundwater here gets deeper every year. I'd also like to see pumping hours on the card." },
-  { who: "Example farmer — Kingston, Jamaica · Maize → Cowpea",
+  { who: "Example farmer", place: "Kingston, Jamaica", rotation: "Maize → Cowpea",
     text: "I'd like to see local crops like yam and callaloo in the list." }
 ];
+// Kartlardaki küçük simgeler (elle çizilmiş SVG; fotoğraf ya da hazır görsel değil): konum iğnesi ve döngü okları
+const ICON_PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" fill="currentColor"/></svg>';
+const ICON_CYCLE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 0 1 14-4.6L20 8M20 3.5V8h-4.5M20 13a8 8 0 0 1-14 4.6L4 16M4 20.5V16h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 // Ana sayfadaki örnek: Konya, kuru tarım, buğday (Eki–Tem) → nadas; su 4, toprak 5, gelir 2; kolay satılan: buğday, mercimek.
 // Puanlar bu yanıtlarla uygulamanın verdiği gerçek puanlardır (14 Kasım 2026). Kurallar ya da ağırlıklar değişirse
@@ -42,7 +45,8 @@ const STORY_INSTRUMENT = { ndvi: "MODIS/Terra", soil: "GLDAS", rain: "MERRA-2", 
 // Hakkımızda sayfasındaki kaynak listesi: yalnızca sitenin gerçekten kullandığı kaynaklar (README.md ile aynı tutulmalı)
 const SOURCES = [
   { name: "NASA GIBS (Global Imagery Browse Services)", url: "https://earthdata.nasa.gov/gibs",
-    use: { en: "All map layers and the base map.", tr: "Bütün harita katmanları ve altlık harita." } },
+    use: { en: "All map layers, the base map, the pictures on the home page and the picture of the Konya plain on this page.",
+      tr: "Bütün harita katmanları, altlık harita, ana sayfadaki görüntüler ve bu sayfadaki Konya ovası görüntüsü." } },
   { name: "NASA POWER", url: "https://power.larc.nasa.gov/",
     use: { en: "Monthly climate for the selected point, 2001–2024.", tr: "Seçilen noktanın aylık iklimi, 2001–2024." } },
   { name: "FAO ECOCROP (via the Recocrop package)", url: "https://ecocrop.apps.fao.org",
@@ -180,10 +184,17 @@ const Pages = {
       who.className = "example-who";
       who.lang = "en"; // başlık ve metin iki dilde de İngilizce gösterilir
       who.textContent = c.who;
+      // Konum ve rotasyon küçük simgelerle (SVG) ayrı bir satırda
+      const meta = document.createElement("p");
+      meta.className = "example-meta";
+      meta.lang = "en";
+      meta.innerHTML = `<span class="example-place">${ICON_PIN}<span></span></span><span class="example-rot">${ICON_CYCLE}<span></span></span>`;
+      meta.querySelector(".example-place span").textContent = c.place;
+      meta.querySelector(".example-rot span").textContent = c.rotation;
       text.className = "example-text";
       text.lang = "en";
       text.textContent = `“${c.text}”`;
-      card.append(label, who, text);
+      card.append(label, who, meta, text);
       examples.appendChild(card);
     });
 
@@ -195,6 +206,9 @@ const Pages = {
     el("planFormSoon").hidden = Boolean(formUrl); // plan ekranındaki bağlantının yanındaki "yakında" bilgisi
     el("commentFormLink").hidden = !formUrl;
     if (formUrl) el("commentFormLink").href = formUrl; else el("commentFormLink").removeAttribute("href");
+
+    // Hakkımızda'daki NASA GIBS görüntüsünün alt metni (görüntü yüklenmezse kutuda bu yazı görünür)
+    el("aboutImage").alt = t("aboutImageAlt");
 
     // Kaynaklar
     const list = el("aboutSources");
