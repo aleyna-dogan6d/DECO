@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Aşama 4: "Gelecek iklim" kaydırıcıları.
 // Yeni bir bitki modeli DEĞİLDİR: Aşama 3'ün puanlama kuralları, kaydırılmış iklimle yeniden çalıştırılır.
 // Bir tahmin değil; iklim değişirse kurallarımıza göre ne olacağını gösteren bir karşılaştırmadır.

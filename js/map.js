@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Harita: altlık (kara/su) + NASA GIBS veri katmanı + sınırlar + yer adları.
 // Tarih değişirken titreme olmasın diye yeni katman yüklenince eskisi kaldırılır.
 

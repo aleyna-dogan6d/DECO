@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Seçilen tarla: yer adı, NASA POWER iklim özeti, halk dilinde özet ve grafik.
 // Ayrıca yer arama (OpenStreetMap Nominatim) burada.
 

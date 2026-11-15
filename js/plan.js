@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Tarla planı ekranı: tarla takvimi + form.
 // Yanıtlar yalnızca bu cihazda saklanır (localStorage); hiçbir sunucuya gönderilmez.
 

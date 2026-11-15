@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Uygulamanın akışı: tarla seçimi, katmanlar, zaman çizelgesi, dil. (Sayfalar ve menü js/pages.js'te.)
 
 const State = {

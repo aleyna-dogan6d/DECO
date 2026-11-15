@@ -281,10 +281,20 @@ subject to the conditions of their providers, listed under "Sources and attribut
 
 ## Use of AI
 
-No AI model runs in the site; the comparison is rule-based. In development: we used AI assistants (Anthropic's
-Claude) to help write code and documentation; all design decisions, data choices and checks were made and
-reviewed by the team.
+We used AI assistants (Anthropic's Claude) to help write code and documentation; all design decisions, data
+choices and checks were made and reviewed by the team.
+
+- **No AI model runs in the site;** all scores come from transparent rules.
+- **Code:** written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
+  Each code file starts with an AI disclosure comment; `index.html` carries an `ai-disclosure` meta tag.
+- **Data:** the crop table (`js/crops.js`) is generated from FAO ECOCROP (Recocrop) by `tools/build_crops.py`,
+  a script written with AI assistance; some crop facts come from the team (listed above, under "Method").
+- **Text:** documentation, site text and presentation text were drafted with AI assistance and edited by the team.
+- **Images:** no AI image generator was used. Map and satellite images come from NASA GIBS. The DECO leaf logo
+  and the small interface icons are simple SVGs drawn in code with AI assistance.
 
 ## Team
 
-DECO Team — NASA Space Apps Challenge 2026 · Field Shift challenge.
+Team Amerikan Okeyi: Aleyna Doğan, Begüm Aksoy, Boran Yılmaz, Burçe Arı, Can Barış Kınal, Ela Demirbilek
+
+NASA Space Apps Challenge 2026 · Field Shift challenge.

@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Aşama 3: rotasyon karşılaştırma motoru.
 // Kural tabanlıdır; yapay zeka ya da tahmin modeli değildir. Kurallar ve ağırlıklar ekip kararıdır (14 Kasım 2026):
 //  - Altı ölçüt, her biri 1–5: iklim uyumu, su, azot katkısı, toprak örtüsü, zararlı döngüsü, satılabilirlik.

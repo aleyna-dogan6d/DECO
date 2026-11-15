@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Arayüz metinleri. Yeni dil eklemek için bu nesneye aynı anahtarlarla bir blok ekleyin
 // ve index.html'deki dil seçicisine bir <option> koyun.
 const I18N = {

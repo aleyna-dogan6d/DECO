@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Sayfalar: Ana sayfa (#home), Tarlamı planla (#plan; uygulamanın kendisi), Çiftçiler (#farmers), Hakkımızda (#about).
 // Hepsi tek HTML dosyasındadır; adresin "#" kısmına göre yalnızca biri görünür. Uygulama (harita ve plan) değişmedi.
 

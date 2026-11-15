@@ -1,3 +1,5 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
+// Generated from FAO ECOCROP (Recocrop) by an AI-assisted script.
 // BU DOSYA OTOMATİK ÜRETİLİR — elle değiştirmeyin.
 // Üreten betik: tools/build_crops.py   Ekibin doldurduğu dosya: tools/urunler.json
 // Değişiklik için urunler.json'u düzenleyip şu komutu çalıştırın:  python tools/build_crops.py

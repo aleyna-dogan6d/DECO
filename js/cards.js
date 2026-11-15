@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Aşama 3: rotasyon kartları (mevcut rotasyon + en fazla üç alternatif).
 // Aşama 4: "gelecek iklim" kaydırıcıları açıkken aynı kartlar kaydırılmış iklimle yeniden puanlanır
 // (kartlardaki rotasyonlar sabit kalır; yalnızca puanlar ve riskler güncellenir).

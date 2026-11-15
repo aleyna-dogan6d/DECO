@@ -148,3 +148,24 @@ Gösterge renklerini ve açıklamadaki renk adlarını katmanın resmi renk skal
 - FAO Crop Calendar yalnızca ürün sürelerinin kontrolünde kullanıldı: Türkiye'yi kapsamıyor; yalnızca Jamaika'da patates ve
   tatlı patates doğrulanabildi.
 - Arayüz tarayıcı diline göre Türkçe ya da İngilizce açılır, dil seçicisinden değiştirilebilir; yeni dil `js/i18n.js` içine eklenebilir.
+
+## Yapay zeka kullanımı
+
+Kod ve belgeleri yazarken yapay zeka yardımcılarından (Anthropic'in Claude'u) yararlandık; bütün tasarım kararlarını,
+veri seçimlerini ve kontrolleri ekip yaptı ve gözden geçirdi. (İngilizcesi README.md'nin "Use of AI" bölümünde.)
+
+- **Sitede çalışan bir yapay zeka modeli yok;** bütün puanlar açık kurallardan gelir.
+- **Kod:** yapay zeka yardımıyla yazıldı (Anthropic Claude, Claude Code üzerinden); DECO ekibi gözden geçirdi ve düzenledi.
+  Her kod dosyası bir "AI disclosure" yorum satırıyla başlar; `index.html` içinde `ai-disclosure` meta etiketi vardır.
+- **Veri:** ürün tablosu (`js/crops.js`), FAO ECOCROP'tan (Recocrop) `tools/build_crops.py` ile üretilir; bu betik yapay
+  zeka yardımıyla yazıldı. Bazı ürün bilgileri ekipten gelir (yukarıda "Ürün eklemek ya da değiştirmek" ve "Bilinen
+  sınırlar" bölümlerinde yazıyor).
+- **Metin:** belgeler, site metinleri ve sunum metinleri yapay zeka yardımıyla taslak olarak yazıldı ve ekipçe düzenlendi.
+- **Görseller:** yapay zeka görsel üreticisi kullanılmadı. Harita ve uydu görüntüleri NASA GIBS'ten gelir. DECO yaprak
+  logosu ve küçük arayüz simgeleri, kodda yapay zeka yardımıyla çizilmiş basit SVG'lerdir.
+
+## Ekip
+
+Team Amerikan Okeyi: Aleyna Doğan, Begüm Aksoy, Boran Yılmaz, Burçe Arı, Can Barış Kınal, Ela Demirbilek
+
+NASA Space Apps Challenge 2026 · Field Shift challenge.

@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Tarla takvimi: seçilen yerin tipik bir yılı (12 ay).
 // Yalnızca NASA POWER'ın 2001–2024 aylık ortalamalarını gösterir; ürüne göre ekim penceresi
 // ürün listesi geldiğinde bunun üstüne eklenecek.

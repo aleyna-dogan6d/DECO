@@ -1,3 +1,4 @@
+// AI disclosure: written with AI assistance (Anthropic Claude, via Claude Code); reviewed and edited by the DECO team.
 // Tarla profili — PROTOTİP (sayfa: #profile).
 // Hesap, şifre, e-posta YOK. Veriler yalnızca bu tarayıcıda saklanır (localStorage "deco-profile"); hiçbir sunucuya
 // gönderilmez. "Bu yıl için önerimiz" yeni bir hesap değildir: plan ekranındaki kural tabanlı karşılaştırma,
