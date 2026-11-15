@@ -12,12 +12,15 @@ const COMMENT_FORM_URL = "";
 // görüneceğini gösterir. Başlık ve metin Türkçe modda da İNGİLİZCE gösterilir (ekip düzeltmesi; çevirisi kullanılmaz);
 // üstteki not ve her karttaki "örnek" etiketi arayüz metnidir ve dile göre değişir (js/i18n.js: farmersExampleNote,
 // farmersExampleLabel). Gerçek kişi adı ve fotoğraf YOK. Metinler ekibin verdiği hâliyle; değiştirmeden önce sor.
+// Her kartın üstünde o bölgenin NASA GIBS görüntüsü vardır (bbox: güney, batı, kuzey, doğu; date: görüntünün günü).
+// Tarihler 15 Kasım 2026'da görüntülere bakılarak seçildi (o gün bölge büyük ölçüde bulutsuz): Konya ovası 2026-07-20,
+// Ludhiana çevresi 2025-03-12, Jamaika 2026-02-19. Kaynak satırı kartların altında bir kez yazılır (farmersImageSource).
 const FARMER_EXAMPLES = [
-  { who: "Example farmer", place: "Konya, Türkiye", rotation: "Wheat → Fallow",
+  { who: "Example farmer", place: "Konya, Türkiye", rotation: "Wheat → Fallow", bbox: [36.9, 31.6, 38.7, 34.8], date: "2026-07-20",
     text: "The idea of lentils instead of a fallow year caught my eye. I'd like to try it on a small plot first and ask my adviser about seed." },
-  { who: "Example farmer", place: "Ludhiana, India", rotation: "Rice → Wheat",
+  { who: "Example farmer", place: "Ludhiana, India", rotation: "Rice → Wheat", bbox: [30.3, 74.78, 31.5, 76.92], date: "2025-03-12",
     text: "The water-saving card matters most to me; groundwater here gets deeper every year. I'd also like to see pumping hours on the card." },
-  { who: "Example farmer", place: "Kingston, Jamaica", rotation: "Maize → Cowpea",
+  { who: "Example farmer", place: "Kingston, Jamaica", rotation: "Maize → Cowpea", bbox: [17.45, -78.52, 18.85, -76.03], date: "2026-02-19",
     text: "I'd like to see local crops like yam and callaloo in the list." }
 ];
 // Kartlardaki küçük simgeler (elle çizilmiş SVG; fotoğraf ya da hazır görsel değil): konum iğnesi ve döngü okları
@@ -122,6 +125,8 @@ const Pages = {
   introDone: false,
 
   init() {
+    // Hakkımızda görüntüsü: yüklenmezse iki kez daha denenir (adres index.html'de yazılı)
+    loadGibsImage(el("aboutImage"), el("aboutImage").getAttribute("src"));
     this.buildTiles();
     this.render();
     Router.init();
@@ -176,9 +181,17 @@ const Pages = {
     // hâliyle i18n.js'tedir (farmersExamples); gerçek yorumlar gelince bu kartlar onlarla KARIŞTIRILMAMALI.
     const examples = el("farmersExamples");
     examples.innerHTML = "";
-    FARMER_EXAMPLES.forEach(c => {
+    FARMER_EXAMPLES.forEach((c, i) => {
       const card = document.createElement("article"), label = document.createElement("p"), who = document.createElement("p"), text = document.createElement("blockquote");
       card.className = "example-card";
+      // Kartın üstünde bölgenin uydu görüntüsü (NASA GIBS WMS); yüklenmezse kutu aynı boyda kalır, alt metin görünür
+      const pic = document.createElement("div"), img = new Image();
+      pic.className = "example-img";
+      img.alt = t("farmersImageAlt")(t("farmersImageRegions")[i]);
+      img.width = 640; img.height = 360; img.decoding = "async";
+      loadGibsImage(img, gibsImageUrl(c.bbox, c.date));
+      pic.appendChild(img);
+      card.appendChild(pic);
       label.className = "example-label";
       label.textContent = t("farmersExampleLabel"); // etiket arayüz metnidir: dile göre değişir
       who.className = "example-who";
@@ -209,6 +222,7 @@ const Pages = {
 
     // Hakkımızda'daki NASA GIBS görüntüsünün alt metni (görüntü yüklenmezse kutuda bu yazı görünür)
     el("aboutImage").alt = t("aboutImageAlt");
+    el("farmersImageSource").textContent = t("farmersImageSource");
 
     // Kaynaklar
     const list = el("aboutSources");

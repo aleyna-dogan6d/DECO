@@ -179,3 +179,23 @@ function layerYears(layer) {
   const f = buildFrames(layer);
   return `${f[0].y}–${f[f.length - 1].y}`;
 }
+
+// ---------- NASA GIBS WMS: tek parça uydu görüntüsü (Hakkımızda, Tarladan kartları, profil kartı) ----------
+// 15 Kasım 2026'da GIBS'in GetCapabilities belgesinden doğrulandı: uç nokta, WMS 1.3.0, CRS EPSG:4326
+// (BBOX sırası: güney enlem, batı boylam, kuzey enlem, doğu boylam) ve katman adı (MODIS/Terra gerçek renk, günlük).
+const GIBS_WMS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi";
+const GIBS_TRUE_COLOR = "MODIS_Terra_CorrectedReflectance_TrueColor";
+function gibsImageUrl(bbox, date, width = 640, height = 360) {
+  return `${GIBS_WMS}?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=${GIBS_TRUE_COLOR}&STYLES=&FORMAT=image/jpeg&CRS=EPSG:4326` +
+    `&BBOX=${bbox.join(",")}&WIDTH=${width}&HEIGHT=${height}&TIME=${date}`;
+}
+// GIBS WMS ara sıra görüntü yerine hata belgesi döndürüyor (15 Kasım 2026'da birkaç kez gözlendi). Görüntü
+// yüklenmezse iki kez daha denenir; yine olmazsa kutu aynı boyda kalır ve görüntünün alt metni görünür.
+function loadGibsImage(img, url, tries = 2) {
+  img.onerror = () => {
+    if (tries <= 0) { img.onerror = null; return; }
+    tries--;
+    setTimeout(() => { img.src = `${url}&retry=${2 - tries}`; }, 700);
+  };
+  img.src = url;
+}

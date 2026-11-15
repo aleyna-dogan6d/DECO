@@ -20,6 +20,10 @@ const PROFILE_DEMO = {
 // Örnek notlar: [kaç gün önce, toprak nemi hissi]; metinler dile göre gösterilir
 const PROFILE_DEMO_NOTES = [[6, "normal"], [34, "dry"], [62, "dry"]];
 
+// "Kayıtlı tarla" kartındaki uydu görüntüsünün günü: SABİT bir tarih (her yer için aynı). Konya'da o gün büyük ölçüde
+// bulutsuzdu (15 Kasım 2026'da görüntüye bakıldı); başka yerlerde bulutlu olabilir, kartta bu açıkça yazılır.
+const PROFILE_SAT_DATE = "2026-07-20";
+
 // İstatistik kutularındaki simgeler (elle çizilmiş SVG; hazır simge kütüphanesi kullanılmaz)
 const PROFILE_ICONS = {
   bars: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21h20M5 21V11M11 21V4M17 21v-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
@@ -213,6 +217,15 @@ const Profile = {
     const fieldBody = this.card(left, "dash-field", p.demo ? P.demoTitle : p.name ? P.savedTitleName(p.name) : P.savedTitle);
     this.factList(fieldBody, p.field, p.answers);
     if (p.created) this.add(fieldBody, "p", "profile-fine", P.created(this.dateText(p.created)));
+    // Kayıtlı noktanın çevresinin uydu görüntüsü (NASA GIBS WMS, sabit tarih); ortadaki işaret kayıtlı noktadır
+    const fig = this.add(fieldBody, "figure", "profile-sat"), pic = this.add(fig, "div", "profile-sat-img"), img = new Image();
+    img.id = "profileSatImage";
+    img.alt = P.satAlt;
+    img.width = 640; img.height = 360; img.decoding = "async";
+    pic.appendChild(img);
+    this.add(pic, "span", "profile-sat-pin").setAttribute("aria-hidden", "true");
+    loadGibsImage(img, gibsImageUrl(this.satBox(p.field), PROFILE_SAT_DATE));
+    this.add(fig, "figcaption", "", P.satCaption(this.dateText(PROFILE_SAT_DATE)));
 
     // Kart: bu yıl için önerimiz
     this.card(right, "dash-advice", P.adviceTitle).id = "profileAdvice";
@@ -254,6 +267,15 @@ const Profile = {
     del.id = "profileDelete";
     this.renderDelete();
     this.renderStats();
+  },
+
+  // Uydu görüntüsünün alanı: kayıtlı noktanın kuzeyine ve güneyine 0,3° (yaklaşık 33 km); doğu–batı yönü yerde aynı
+  // ölçekte olsun diye enleme göre genişletilir (16:9 kutu: yaklaşık 118 km × 66 km). Kenarlar 0,01°'ye yuvarlanır.
+  // Dönen değer: [güney, batı, kuzey, doğu]
+  satBox(f) {
+    const h = 0.3, w = (h * 16 / 9) / Math.max(0.2, Math.cos((f.lat * Math.PI) / 180));
+    const r = v => Math.round(v * 100) / 100;
+    return [r(Math.max(-90, f.lat - h)), r(f.lng - w), r(Math.min(90, f.lat + h)), r(f.lng + w)];
   },
 
   // Başlıklı kart: gövdesini döndürür

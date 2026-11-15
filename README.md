@@ -61,8 +61,8 @@ profile":** one click loads a ready-made example (Konya, wheat + fallow, three n
 are examples and do not belong to a real farmer.
 
 Answers and the profile are stored only in the browser (localStorage) and are not sent to any server. To fetch data,
-only the coordinates of the selected point (and the place name typed in the search) are sent to NASA POWER and to
-OpenStreetMap's Nominatim.
+only the coordinates of the selected point (and the place name typed in the search) are sent to NASA POWER, NASA
+GIBS and OpenStreetMap's Nominatim.
 
 ## NASA data used
 
@@ -77,7 +77,7 @@ OpenStreetMap's Nominatim.
 | Temperature | `MERRA2_2m_Air_Temperature_Monthly` | 2001–2026 | Monthly air temperature |
 | Groundwater | `GRACE_Tellus_Liquid_Water_Equivalent_Thickness_Mascon_CRI` | 2002–2022 | Water stored on and under the ground, compared with normal |
 | Base map | `OSM_Land_Water_Map`, `Reference_Features`, `Reference_Labels` | – | Land/water background, borders, place names |
-| Picture on the About page | `MODIS_Terra_CorrectedReflectance_TrueColor` (GIBS WMS) | 20 July 2026 | One true-colour picture of the Konya plain, Türkiye; for illustration only |
+| Pictures on the About, From the Field and My field pages | `MODIS_Terra_CorrectedReflectance_TrueColor` (GIBS WMS) | 20 July 2026 (Konya plain; also the fixed date of the picture around a saved field), 12 March 2025 (Punjab around Ludhiana), 19 February 2026 (Jamaica) | True-colour pictures of a region, for illustration only; they are not used in any score |
 
 Layer names and dates were checked against the GIBS catalogue on 14 November 2026. Legend colours are sampled
 from the official GIBS colour-map files.
@@ -196,7 +196,9 @@ None of these is done yet (the same list is on the About page):
     (served by GIBS; the underlying map data are © OpenStreetMap contributors).
   - `MODIS_Terra_CorrectedReflectance_TrueColor` (MODIS/Terra true colour), requested once through the GIBS WMS
     endpoint (https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi; layer name checked in its
-    GetCapabilities document on 15 November 2026) – the picture of the Konya plain on the About page.
+    GetCapabilities document on 15 November 2026) – the picture of the Konya plain on the About page, the three
+    region pictures above the example cards on the From the Field page, and the picture of the area around the saved
+    point on the My field page (fixed date 20 July 2026; it may be cloudy for other places).
 - **NASA POWER – Prediction Of Worldwide Energy Resources** (NASA Langley Research Center):
   https://power.larc.nasa.gov/ — monthly point climate data, 2001–2024; parameters `T2M`, `T2M_MIN`,
   `PRECTOTCORR`, `T2M_RANGE`, `TOA_SW_DWN` (see the table above for what each is used for).

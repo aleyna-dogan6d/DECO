@@ -820,3 +820,14 @@ h2.mid { margin: 36px 0 8px; font-size: 22px; font-weight: 800; letter-spacing: 
   .dash-notes { order: 3; }
   .dash-delete { order: 4; }
 }
+
+/* ---------- NASA GIBS görüntüleri: Tarladan kartlarının üstü ve profilde "Kayıtlı tarla" kartı (ekip kararı, 15 Kasım 2026) ----------
+   Kutular sabit en-boy oranındadır (16:9): görüntü yüklenmezse sayfa kaymaz, kutuda görüntünün alt metni görünür. NASA logosu yok. */
+.example-img { aspect-ratio: 16 / 9; margin: -16px -16px 12px; overflow: hidden; border-bottom: 1px solid rgba(22, 33, 27, .3); background: #dfe6e2; }
+.example-img img, .profile-sat-img img { display: block; width: 100%; height: 100%; object-fit: cover; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.example-source { margin: 8px 0 0 !important; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.profile-sat { margin: 12px 0 0; }
+.profile-sat-img { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid rgba(22, 33, 27, .3); background: #dfe6e2; }
+/* Ortadaki işaret: kayıtlı nokta */
+.profile-sat-pin { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border: 3px solid var(--header-text); border-radius: 50%; background: var(--green); box-shadow: 0 0 0 2px var(--ink); }
+.profile-sat figcaption { margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
