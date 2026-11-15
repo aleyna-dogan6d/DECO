@@ -118,7 +118,8 @@ const Profile = {
       name: name.trim().slice(0, 40),
       field: { lat: Number(s.field.lat.toFixed(4)), lng: Number(s.field.lng.toFixed(4)), name: s.field.name },
       // Yanıtların kopyası saklanır: plan ekranında sonradan yapılan değişiklikler profili değiştirmez
-      answers: JSON.parse(JSON.stringify({ rotation: s.rotation, sell: a.sell, soil: a.soil, water: a.water, slope: a.slope, prio: a.prio })),
+      // (check = 5 dakikalık tarla testi cevapları; varsa yalnızca "Tarla testi" kartında gösterilir, hesaba girmez)
+      answers: JSON.parse(JSON.stringify({ rotation: s.rotation, sell: a.sell, soil: a.soil, water: a.water, slope: a.slope, prio: a.prio, check: a.check })),
       created: this.today(),
       notes: []
     };
@@ -227,6 +228,18 @@ const Profile = {
     this.add(pic, "span", "profile-sat-pin").setAttribute("aria-hidden", "true");
     loadGibsImage(img, gibsImageUrl(this.satBox(p.field), PROFILE_SAT_DATE));
     this.add(fig, "figcaption", "", P.satCaption(this.dateText(PROFILE_SAT_DATE)));
+
+    // Kart: 5 dakikalık tarla testi (yalnızca test yapıldıysa; saha gözlemi kaydıdır, hesaba GİRMEZ)
+    const checkRows = FieldCheck.rows(p.answers.check);
+    if (checkRows.length) {
+      const F = t("fc"), checkBody = this.card(left, "dash-check", F.cardTitle);
+      checkBody.id = "profileCheck";
+      const dl = this.add(checkBody, "dl", "profile-facts");
+      checkRows.forEach(([k, v]) => { this.add(dl, "dt", "", k); this.add(dl, "dd", "", v); });
+      this.add(checkBody, "p", "profile-fine", F.cardNote);
+      this.add(checkBody, "p", "profile-fine", F.note);
+      this.add(checkBody, "p", "profile-fine", F.source);
+    }
 
     // Kart: bu yıl için önerimiz
     this.card(right, "dash-advice", P.adviceTitle).id = "profileAdvice";

@@ -42,7 +42,7 @@ js/rotation.js    rotasyon karşılaştırması: takvim, altı ölçüt (1–5),
 js/future.js      "gelecek iklim" kaydırıcıları: iklimi kaydırır (sıcaklık, yağış, FAO-56 Hargreaves ile buharlaşma düzeltmesi); yeni bir bitki modeli değildir
 js/cards.js       rotasyon kartları: mevcut rotasyon + en fazla üç alternatif; kanıt, bilgi boşluğu ve risk cümleleri; kaydırıcılarla yeniden puanlama; "Bu seçeneği incele" paneli (puanların gerçek sayılarla açıklaması, geçiş takvimi, yardım kutusu)
 js/pages.js       sayfalar ve menü (#home, #plan, #farmers, #about, #profile), ana sayfa hikâyesi ve animasyonlar (GSAP)
-js/plan.js        tarla planı ekranı: mevcut rotasyon (ekim dönemleri), toprak, su, eğim, öncelikler; yanıtlar cihazda saklanır
+js/plan.js        tarla planı ekranı: mevcut rotasyon (ekim dönemleri), toprak, su, eğim, öncelikler; yanıtlar cihazda saklanır; "5 dakikalık tarla testi" (FieldCheck: toprak dokusu ve eğim cevabı formu doldurur, drenaj ve geçen yıl yalnızca kaydedilir; puanlama kuralı eklemez; yöntem: FAO / USDA NRCS "soil texture by feel", metinler ve cm eşikleri ekipten)
 js/profile.js     tarla profili PROTOTİPİ (#profile): kayıtlı tarla ve rotasyon, "Bu yıl için önerimiz" kartı, aylık tarla notu; "Örnek profili aç" düğmesi (hazır örnek: Konya, buğday + nadas, "Örnek" etiketli üç not); hesap/şifre/e-posta yok, veriler yalnızca tarayıcıda (localStorage "deco-profile")
 js/app.js         uygulama akışı: karşılama, katmanlar, oynatma, dil
 ```

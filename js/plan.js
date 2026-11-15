@@ -66,6 +66,9 @@ const Plan = {
           const v = Math.round(Number(saved.prio && saved.prio[p]));
           if (v >= 1 && v <= 5) a.prio[p] = v;
         });
+        // 5 dakikalık tarla testi: yalnızca kayıt (puana girmez); test hiç yapılmadıysa alan hiç yoktur
+        const check = FieldCheck.clean(saved.check);
+        if (check) a.check = check;
       }
     } catch {}
     return a;
@@ -88,6 +91,7 @@ const Plan = {
     el("planForm").addEventListener("submit", e => { e.preventDefault(); this.submit(); });
     el("planForm").addEventListener("input", e => this.onInput(e.target));
     Future.init();
+    FieldCheck.init();
     this.renderForm();
   },
 
@@ -326,6 +330,8 @@ const Plan = {
       label.querySelector("span").textContent = name;
       sell.appendChild(label);
     });
+
+    FieldCheck.render(); // tarla testi paneli açıksa metinleri (dil, sıfırlama) yenilenir
   },
 
   onInput(input) {
@@ -405,6 +411,7 @@ const Plan = {
     try { localStorage.removeItem(PLAN_KEY); } catch {}
     this.hideResults();
     el("formError").hidden = true;
+    FieldCheck.step = 0;
     this.renderForm();
     toast(t("answersCleared"));
   },
@@ -415,5 +422,198 @@ const Plan = {
     this.renderHead();
     Calendar.render(Field.data);
     if (this.submitted) this.showResults();
+  }
+};
+
+// ---------- 5 dakikalık tarla testi ("5-minute field check") ----------
+// Toprak/su/eğim sorularının üstündeki adım adım rehber (#fieldCheck). Toprak dokusu ve eğim cevabı formdaki MEVCUT
+// soruyu doldurur (çiftçi elle seçmiş gibi); drenaj ve "geçen yıl" cevapları yalnızca kaydedilir (answers.check).
+// Yeni bir puanlama kuralı DEĞİLDİR: answers.check hiçbir hesapta okunmaz. Metinler i18n.js'te "fc" altında.
+const FC_TEXTURE = ["sandy", "loam", "clay"];
+const FC_DRAIN = ["often", "sometimes", "no"];
+const FC_YIELD = ["good", "mid", "poor"];
+const FC_PROBLEMS = ["drought", "waterlog", "pest", "disease", "none"];
+const FC_STEPS = 4;
+
+const FieldCheck = {
+  step: 0, // 0–3: adımlar; 4: sonuç ekranı
+
+  blank() {
+    return { texture: null, drain: null, slope: null, lastCrop: null, lastYield: null, problems: [] };
+  },
+
+  isEmpty(c) {
+    return !c || !(c.texture || c.drain || c.slope || c.lastCrop || c.lastYield || c.problems.length);
+  },
+
+  // Saklanmış cevapları denetler; tanınmayan değerleri yok sayar. Hiç cevap yoksa null döner.
+  clean(s) {
+    if (!s || typeof s !== "object") return null;
+    const c = this.blank(), pick = (list, v) => (list.includes(v) ? v : null);
+    c.texture = pick(FC_TEXTURE, s.texture);
+    c.drain = pick(FC_DRAIN, s.drain);
+    c.slope = pick(PLAN_QUESTIONS.slope, s.slope);
+    c.lastCrop = s.lastCrop === FALLOW || CROPS.some(x => x.id === s.lastCrop) ? s.lastCrop : null;
+    c.lastYield = pick(FC_YIELD, s.lastYield);
+    if (Array.isArray(s.problems)) c.problems = FC_PROBLEMS.filter(p => s.problems.includes(p));
+    return this.isEmpty(c) ? null : c;
+  },
+
+  // Kayıtlı cevapların [etiket, değer] satırları (sonuç ekranı ve profildeki "Tarla testi" kartı aynı listeyi kullanır)
+  rows(c) {
+    const rows = [];
+    if (this.isEmpty(c)) return rows;
+    const F = t("fc"), opts = t("opts");
+    if (c.texture) rows.push([F.rows.texture, opts.soil[c.texture][0]]);
+    if (c.drain) rows.push([F.rows.drain, F.drain[c.drain]]);
+    if (c.slope) rows.push([F.rows.slope, opts.slope[c.slope][0]]);
+    if (c.lastCrop) rows.push([F.rows.lastCrop, c.lastCrop === FALLOW ? t("fallowShort") : cropName(c.lastCrop)]);
+    if (c.lastYield) rows.push([F.rows.lastYield, F.yield[c.lastYield]]);
+    if (c.problems.length) rows.push([F.rows.problems, c.problems.map(p => F.problems[p]).join(", ")]);
+    return rows;
+  },
+
+  init() {
+    const btn = el("fieldCheckBtn"), panel = el("fieldCheckPanel");
+    if (!btn || !panel) return; // tarayıcı eski bir index.html'i önbellekten açtıysa site yine de çalışsın
+    btn.addEventListener("click", () => this.toggle(panel.hidden));
+    panel.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (b) this.onClick(b);
+    });
+    panel.addEventListener("change", e => {
+      if (e.target.dataset.fc === "lastCrop") this.set("lastCrop", e.target.value || null);
+    });
+  },
+
+  toggle(open) {
+    el("fieldCheckPanel").hidden = !open;
+    el("fieldCheckBtn").setAttribute("aria-expanded", String(open));
+    if (open) this.render();
+  },
+
+  data() {
+    return Plan.answers.check || this.blank();
+  },
+
+  set(key, value) {
+    const c = this.data();
+    if (key === "problems") {
+      // Birden fazla seçilebilir; "Yok" diğerleriyle birlikte seçilemez
+      const had = c.problems.includes(value);
+      let list = had ? c.problems.filter(p => p !== value) : [...c.problems, value];
+      if (!had) list = value === "none" ? ["none"] : list.filter(p => p !== "none");
+      c.problems = FC_PROBLEMS.filter(p => list.includes(p));
+    } else {
+      c[key] = value;
+    }
+    if (this.isEmpty(c)) delete Plan.answers.check;
+    else Plan.answers.check = c;
+
+    // Toprak dokusu ve eğim: formdaki mevcut soruyu doldurur (çiftçi aşağıdan değiştirebilir)
+    const q = key === "texture" ? "soil" : key === "slope" ? "slope" : null;
+    if (q && value) {
+      Plan.answers[q] = value;
+      const radio = document.querySelector(`#${q}Choices input[value="${value}"]`);
+      if (radio) radio.checked = true;
+    }
+    Plan.save();
+    if (q && value) Plan.afterAnswerChange(); // elle seçilmiş gibi: sonuçlar açıksa yeniden hesaplanır
+  },
+
+  onClick(b) {
+    const act = b.dataset.act, key = b.dataset.fc, val = b.dataset.val;
+    if (act === "back") this.step = Math.max(0, this.step - 1);
+    else if (act === "next") this.step = Math.min(FC_STEPS, this.step + 1);
+    else if (act === "again") this.step = 0;
+    else if (act === "close") { this.toggle(false); el("fieldCheckBtn").focus(); return; }
+    else if (key) this.set(key, val);
+    else return;
+    this.render();
+    // Panel yeniden çizildiği için klavye odağı aynı seçeneğe (ya da panelin başına) geri verilir
+    const panel = el("fieldCheckPanel");
+    const again = key ? panel.querySelector(`[data-fc="${key}"][data-val="${val}"]`) : panel.querySelector(".fc-title");
+    if (again) again.focus({ preventScroll: true });
+  },
+
+  render() {
+    const panel = el("fieldCheckPanel");
+    if (!panel || panel.hidden) return;
+    const F = t("fc"), opts = t("opts"), short = t("summaryLabels"), c = this.data(), s = this.step;
+    const add = (parent, tag, cls, text) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      parent.appendChild(n);
+      return n;
+    };
+    const option = (parent, key, val, title, help, on) => {
+      const b = add(parent, "button", "fc-opt");
+      b.type = "button"; b.dataset.fc = key; b.dataset.val = val;
+      b.setAttribute("aria-pressed", String(on));
+      add(b, "span", "fc-opt-title", title);
+      if (help) add(b, "span", "fc-opt-help", help);
+    };
+    const navBtn = (parent, act, cls, text) => {
+      const b = add(parent, "button", `btn ${cls}`, text);
+      b.type = "button"; b.dataset.act = act;
+    };
+
+    panel.innerHTML = "";
+    const title = add(panel, "h4", "fc-title", F.title);
+    title.tabIndex = -1;
+
+    if (s >= FC_STEPS) {
+      // Sonuç ekranı: kaydedilen cevaplar + "saha gözlemi" notu
+      add(panel, "p", "fc-step", F.doneTitle);
+      const rows = this.rows(Plan.answers.check);
+      if (!rows.length) add(panel, "p", "fc-fine", F.doneEmpty);
+      else {
+        const dl = add(panel, "dl", "fc-facts");
+        rows.forEach(([k, v]) => { add(dl, "dt", "", k); add(dl, "dd", "", v); });
+        add(panel, "p", "fc-fine", F.doneHint);
+      }
+      add(panel, "p", "fc-note", F.note);
+      const nav = add(panel, "div", "fc-nav");
+      navBtn(nav, "back", "btn-soft", F.back);
+      navBtn(nav, "again", "btn-soft", F.again);
+      navBtn(nav, "close", "btn-primary", F.close);
+    } else {
+      add(panel, "p", "fc-step", `${F.step(s + 1, FC_STEPS)} · ${F.heads[s]}`);
+      add(panel, "p", "fc-task", F.tasks[s]);
+      const box = add(panel, "div", "fc-opts");
+      if (s === 0) {
+        FC_TEXTURE.forEach(v => option(box, "texture", v, F.texture[v], `→ ${opts.soil[v][0]}`, c.texture === v));
+        if (c.texture) add(panel, "p", "fc-filled", F.filled(short.soil, opts.soil[c.texture][0]));
+      } else if (s === 1) {
+        FC_DRAIN.forEach(v => option(box, "drain", v, F.drain[v], "", c.drain === v));
+        add(panel, "p", "fc-fine", F.drainNote);
+      } else if (s === 2) {
+        PLAN_QUESTIONS.slope.forEach(v => option(box, "slope", v, opts.slope[v][0], opts.slope[v][1], c.slope === v));
+        if (c.slope) add(panel, "p", "fc-filled", F.filled(short.slope, opts.slope[c.slope][0]));
+      } else {
+        // Geçen yıl: ürün (listeden), verim, yaşanan sorunlar (çoklu). Yalnızca kayıt.
+        box.className = "fc-groups";
+        const g1 = add(box, "label", "fc-group");
+        add(g1, "span", "fc-label", F.lastCrop);
+        const sel = add(g1, "select", "fc-select");
+        sel.dataset.fc = "lastCrop";
+        const crops = CROPS.map(x => [x.id, x.name[LANG]]).sort((a, b) => a[1].localeCompare(b[1], LANG));
+        crops.unshift([FALLOW, t("fallowOption")]);
+        Plan.fillSelect(sel, t("cropChoose"), crops, c.lastCrop);
+        const g2 = add(box, "div", "fc-group");
+        add(g2, "span", "fc-label", F.lastYield);
+        const y = add(g2, "div", "fc-opts fc-row");
+        FC_YIELD.forEach(v => option(y, "lastYield", v, F.yield[v], "", c.lastYield === v));
+        const g3 = add(box, "div", "fc-group");
+        add(g3, "span", "fc-label", F.lastProblems);
+        const pr = add(g3, "div", "fc-opts fc-row");
+        FC_PROBLEMS.forEach(v => option(pr, "problems", v, F.problems[v], "", c.problems.includes(v)));
+      }
+      const nav = add(panel, "div", "fc-nav");
+      if (s > 0) navBtn(nav, "back", "btn-soft", F.back);
+      navBtn(nav, "next", "btn-primary", s === FC_STEPS - 1 ? F.finish : F.next);
+    }
+    add(panel, "p", "fc-src", F.source);
   }
 };

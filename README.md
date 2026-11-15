@@ -50,6 +50,13 @@ There is also a **prototype** "My field" profile page (see below). The steps bel
    and information gaps, and a "Want help?" box with links to FAO and NASA pages and the advice to ask a local
    adviser about variety, seed rate and soil analysis.
 
+**"5-minute field check" (optional).** Above the soil, water and slope questions there is a button, "Not sure? Do
+the 5-minute field check". It opens a four-step guide: soil texture by feel (fills in the soil question), puddles
+a day after rain (only recorded; the form has no drainage question), slope (fills in the slope question) and last
+year (crop, yield, problems; only recorded). It adds no scoring rule: the recorded answers are never read by the
+comparison, and if a profile is saved they are shown in its "Field check" card. It ends with the note "This is a
+field observation; for a definite result, have your soil tested."
+
 **"My field" profile (prototype).** A farmer can save the selected field and the current rotation, see the
 highest-scoring card for the saved field ("Our suggestion for this year": the same rule-based engine run again,
 not a forecast), and keep a short monthly field note (date, how the soil feels: dry / normal / wet, free text).
@@ -215,6 +222,12 @@ None of these is done yet (the same list is on the About page):
 - **FAO Irrigation Water Management Training Manual No. 1, chapter "Soil and water":**
   https://www.fao.org/4/r4082e/r4082e03.htm — the soil sentences (sandy soil holds little water; clay soil is
   heavy and hard to work).
+- **"Soil texture by feel" field method (FAO / USDA NRCS):** the three soil-texture answers in the optional
+  "5-minute field check" (falls apart → sandy; short ribbon → loamy; long shiny ribbon → clay). The step texts and
+  the ribbon lengths (2–3 cm, 5 cm) were written by the team; on 15 Nov 2026 the USDA NRCS guide page could not be
+  opened to check them (time-out). FAO describes similar ball and "sausage" field tests, with different lengths, at
+  https://www.fao.org/fishery/docs/CDrom/FAO_Training/FAO_Training/General/x6706e/x6706e06.htm. The check is a
+  field observation, not a soil analysis, and it adds no scoring rule.
 - **FAO Irrigation and Drainage Paper 56, "Crop evapotranspiration" (FAO-56):**
   https://www.fao.org/4/x0490e/x0490e07.htm — the Hargreaves equation (equation 52) used by the climate sliders.
 - **FAO Crop Calendar:** https://cropcalendar.apps.fao.org/ — used only to cross-check how long crops stay in the
@@ -262,7 +275,7 @@ js/rotation.js    rotation timeline, six scores, alternatives (rule-based)
 js/future.js      climate sliders: shifted climate, Hargreaves reference evapotranspiration
 js/cards.js       rotation cards, the "Look into this option" panel and the "What if the climate changes?" box
 js/pages.js       pages and menu (#home, #plan, #farmers, #about, #profile), home-page story and animations
-js/plan.js        field plan form; answers stay in the browser
+js/plan.js        field plan form and the optional "5-minute field check"; answers stay in the browser
 js/profile.js     "My field" profile prototype: saved field, rotation and monthly notes, browser storage only
 js/app.js         app flow, layers, playback, language
 tools/            build_crops.py and the team's crop list (urunler.json)

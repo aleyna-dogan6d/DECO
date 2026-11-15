@@ -520,6 +520,41 @@ const I18N = {
     qPriorities: "Sizin için ne kadar önemli?",
     prioHelp: "Her kaydırıcıyı ayarlayın: 1 = benim için önemli değil, 5 = çok önemli.",
     prio: { water: "Su tasarrufu", soil: "Toprak sağlığı", income: "Ek gelir" },
+    // 5 dakikalık tarla testi (js/plan.js, FieldCheck). Adım metinleri ekibin verdiği hâliyle; puanlamaya girmez.
+    fcOpen: "Emin değil misiniz? 5 dakikalık tarla testi yapın",
+    fc: {
+      title: "5 dakikalık tarla testi",
+      step: (n, total) => `Adım ${n} / ${total}`,
+      heads: ["Toprak dokusu", "Su tutma (drenaj)", "Eğim", "Geçen yıl"],
+      tasks: [
+        "Bir avuç toprak alın, biraz ıslatın ve avucunuzda yoğurun.",
+        "Yağmurdan bir gün sonra tarlada su birikintisi kalıyor mu?",
+        "Tarlanın bir ucundan diğerine yürüyün. Yokuş hissediyor musunuz? Yağmurda su bir yöne akıp toprak taşıyor mu?",
+        "Geçen yılı kısaca not edin. Bu cevaplar yalnızca kayıt içindir; puana girmez."
+      ],
+      texture: {
+        sandy: "Dağılıyor, top olmuyor, kumlu hissediliyor",
+        loam: "Top oluyor ama şerit yapınca 2–3 cm'de kırılıyor",
+        clay: "Parmaklar arasında 5 cm'den uzun, parlak bir şerit oluyor; yapışkan"
+      },
+      drain: { often: "Evet, sık sık", sometimes: "Bazen", no: "Hayır" },
+      drainNote: "Formda bu soruya karşılık gelen bir soru yok; cevabınız yalnızca kaydedilir ve puana girmez.",
+      filled: (q, v) => `Formdaki "${q}" sorusu "${v}" olarak dolduruldu. İsterseniz aşağıdan değiştirebilirsiniz.`,
+      lastCrop: "Geçen yıl ne ekildi?",
+      lastYield: "Verim nasıldı?",
+      yield: { good: "İyi", mid: "Orta", poor: "Kötü" },
+      lastProblems: "Yaşanan sorun (birden fazla seçebilirsiniz)",
+      problems: { drought: "Kuraklık", waterlog: "Su birikmesi", pest: "Zararlı", disease: "Hastalık", none: "Yok" },
+      back: "Geri", next: "İleri", finish: "Bitir", close: "Kapat", again: "Baştan başla",
+      doneTitle: "Tarla testi tamamlandı",
+      doneEmpty: "Hiçbir adımı yanıtlamadınız.",
+      doneHint: "Toprak dokusu ve eğim cevabınız aşağıdaki soruları doldurdu. Diğer cevaplar yalnızca kayıttır; profil kaydederseniz \"Tarla testi\" kartında görünür.",
+      note: "Bu bir saha gözlemidir; kesin sonuç için toprak analizi yaptırın.",
+      source: "Yöntem: FAO / USDA NRCS 'soil texture by feel'",
+      rows: { texture: "Toprak dokusu", drain: "Yağmurdan sonra su birikintisi", slope: "Eğim", lastCrop: "Geçen yıl ekilen", lastYield: "Geçen yılın verimi", problems: "Geçen yıl yaşanan sorun" },
+      cardTitle: "Tarla testi",
+      cardNote: "Bunlar sizin saha gözlemlerinizdir. Toprak dokusu ve eğim cevabı formdaki soruyu doldurur; diğerleri yalnızca kayıttır ve puana girmez."
+    },
     opts: {
       soil: {
         sandy: ["Kumlu", "Elde pütürlüdür, dağılır; su çabuk süzülür."],
@@ -1056,6 +1091,41 @@ const I18N = {
     qPriorities: "How much does each of these matter to you?",
     prioHelp: "Set each slider: 1 = not important to me, 5 = very important.",
     prio: { water: "Saving water", soil: "Soil health", income: "Extra income" },
+    // 5-minute field check (js/plan.js, FieldCheck). Step texts as given by the team; never enters the scoring.
+    fcOpen: "Not sure? Do the 5-minute field check",
+    fc: {
+      title: "5-minute field check",
+      step: (n, total) => `Step ${n} of ${total}`,
+      heads: ["Soil texture", "Water holding (drainage)", "Slope", "Last year"],
+      tasks: [
+        "Take a handful of soil, wet it a little and knead it in your palm.",
+        "One day after rain, are there still puddles in the field?",
+        "Walk from one end of the field to the other. Do you feel a slope? When it rains, does water run one way and carry soil with it?",
+        "Note last year briefly. These answers are only kept as a record; they do not enter the score."
+      ],
+      texture: {
+        sandy: "It falls apart, will not form a ball, and feels gritty",
+        loam: "It forms a ball, but a ribbon breaks at 2–3 cm",
+        clay: "It makes a shiny ribbon longer than 5 cm between the fingers; sticky"
+      },
+      drain: { often: "Yes, often", sometimes: "Sometimes", no: "No" },
+      drainNote: "The form has no matching question; your answer is only recorded and does not enter the score.",
+      filled: (q, v) => `The "${q}" question in the form was set to "${v}". You can change it below if you like.`,
+      lastCrop: "What was grown last year?",
+      lastYield: "How was the yield?",
+      yield: { good: "Good", mid: "Medium", poor: "Poor" },
+      lastProblems: "Problems you had (pick as many as apply)",
+      problems: { drought: "Drought", waterlog: "Waterlogging", pest: "Pests", disease: "Disease", none: "None" },
+      back: "Back", next: "Next", finish: "Finish", close: "Close", again: "Start over",
+      doneTitle: "Field check finished",
+      doneEmpty: "You did not answer any step.",
+      doneHint: "Your soil texture and slope answers filled in the questions below. The other answers are only a record; if you save a profile they appear in its \"Field check\" card.",
+      note: "This is a field observation; for a definite result, have your soil tested.",
+      source: "Method: FAO / USDA NRCS 'soil texture by feel'",
+      rows: { texture: "Soil texture", drain: "Puddles a day after rain", slope: "Slope", lastCrop: "Grown last year", lastYield: "Last year's yield", problems: "Problems last year" },
+      cardTitle: "Field check",
+      cardNote: "These are your own field observations. The soil texture and slope answers fill in the form question; the others are only a record and do not enter the score."
+    },
     opts: {
       soil: {
         sandy: ["Sandy", "Feels gritty and falls apart; water drains away fast."],
