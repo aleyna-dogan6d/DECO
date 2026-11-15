@@ -1,0 +1,491 @@
+{
+  "_aciklama": [
+    "Bu dosyayı EKİP doldurur. Sayısal değerler (sıcaklık, yağış, yetişme süresi) buraya YAZILMAZ; onları build_crops.py ECOCROP tablosundan alır.",
+    "Değişiklikten sonra field-shift klasöründe şu komutu çalıştırın:  python tools/build_crops.py",
+    "id: kodda kullanılan kısa ad (küçük harf, boşluksuz). Değiştirirseniz kayıtlı rotasyonlardaki o ürün boş görünür.",
+    "ecocropCode: ECOCROP tablosundaki CODE numarası. Doğru satırı bulmak için:  python tools/build_crops.py --ara \"Zea mays\"",
+    "bilimselAd: tablodaki SCIENTNAME bu yazıyla başlamalı; başlamıyorsa betik durur (yanlış satır seçilmesin diye).",
+    "grup: cereal | legume | oilseed | root  (ECOCROP'ta yok, ekibin sınıflandırması).",
+    "donaDayanikli: true / false / null. Tabloda öldürücü sıcaklığı (KTMP) 0 olan ürünlerde ve kışlık ekilebilen ürünlerde kullanılır (kışlık ürünlerde tablodaki KTMP'nin yerine geçer); kaynağı ECOCROP değil EKİPTİR.",
+    "kislikEkilebilir: true ise ürün kışlık ekilebilir; soğuk ama öldürücü olmayan aylar 'uygun değil' yerine 'kış beklemesi' sayılır. Kaynağı ECOCROP değil EKİPTİR.",
+    "uzunSureli: true ise ürün tarlada bir yıla yakın ya da daha uzun kalabilir.",
+    "duzeltme: tablodaki bir sayıyı elle düzeltmek için. Örnek:  \"duzeltme\": { \"KTMP\": { \"deger\": -3, \"gerekce\": \"FAO sayfasında -3 yazıyor (kontrol: 15 Kasım 2026)\" } }",
+    "  Düzeltilebilen alanlar: GMIN, GMAX, KTMP, TMIN, TOPMN, TOPMX, TMAX, RMIN, ROPMN, ROPMX, RMAX. Gerekçe zorunludur; düzeltme ve gerekçesi crops.js'teki nota yazılır.",
+    "not: satır seçimi, kontrol edilecek noktalar gibi açıklamalar. crops.js'e 'check' alanı olarak yazılır.",
+    "tipikSureAy: ürünün tarlada kaldığı tipik süre (ay). Aşama 3'te çiftçinin ekmediği bir ürünü takvime yerleştirmek için kullanılır.",
+    "tipikSureOnay: false ise değer ÖNERİDİR / EKSİKTİR ve sitede 'taslak' diye gösterilir. Değeri kontrol edip uygun bulursanız true yapın.",
+    "tipikSureKaynak: sürenin nereden geldiği. Değeri değiştirirseniz buraya kendi kaynağınızı ya da 'ekip bilgisi' yazın.",
+    "faoSuIhtiyaci: FAO sulama el kitabı Tablo 14'teki değer (mm, tüm yetişme dönemi). Betik bunu ECOCROP'tan değil bu dosyadan alır; 8 üründe tabloda değer yok (null). Puana girmez, kartta 'Kanıt' satırında gösterilir.",
+    "kislikSureAy: yalnızca kışlık ekilebilen 6 ürün için; sonbaharda ekilince tarlada kaldığı süre (ay). Kaynağı kislikSureKaynak alanına yazılır."
+  ],
+  "urunler": [
+    {
+      "id": "wheat",
+      "ecocropCode": 8,
+      "bilimselAd": "Triticum aestivum",
+      "ad": {
+        "en": "Wheat",
+        "tr": "Buğday"
+      },
+      "grup": "cereal",
+      "donaDayanikli": true,
+      "kislikEkilebilir": true,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 5,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Barley/Oats/Wheat' 120-150 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": 9,
+      "faoSuIhtiyaci": {
+        "satir": "Barley/Oats/Wheat",
+        "mm": "450-650",
+        "kurakligaDuyarlilik": "low-medium"
+      },
+      "kislikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek."
+    },
+    {
+      "id": "barley",
+      "ecocropCode": 9,
+      "bilimselAd": "Hordeum vulgare",
+      "ad": {
+        "en": "Barley",
+        "tr": "Arpa"
+      },
+      "grup": "cereal",
+      "donaDayanikli": true,
+      "kislikEkilebilir": true,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Dayanma üst sınırı 40°C, en iyi aralığın üst ucu 20°C: aradaki fark çok büyük; FAO sitesinden kontrol edilecek.",
+      "tipikSureAy": 5,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Barley/Oats/Wheat' 120-150 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": 8,
+      "faoSuIhtiyaci": {
+        "satir": "Barley/Oats/Wheat",
+        "mm": "450-650",
+        "kurakligaDuyarlilik": "low-medium"
+      },
+      "kislikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek."
+    },
+    {
+      "id": "rye",
+      "ecocropCode": 18,
+      "bilimselAd": "Secale cereale",
+      "ad": {
+        "en": "Rye",
+        "tr": "Çavdar"
+      },
+      "grup": "cereal",
+      "donaDayanikli": true,
+      "kislikEkilebilir": true,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek.",
+      "kislikSureAy": 10,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek."
+    },
+    {
+      "id": "maize",
+      "ecocropCode": 2,
+      "bilimselAd": "Zea mays",
+      "ad": {
+        "en": "Maize (corn)",
+        "tr": "Mısır"
+      },
+      "grup": "cereal",
+      "donaDayanikli": false,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Tabloda 8 mısır satırı var; genel olan 'Maize' (Zea mays L. s. mays) seçildi. Dayanma üst sınırı 47°C yüksek görünüyor; kontrol edilecek.",
+      "tipikSureAy": 5,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Maize grain' 125-180 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Maize",
+        "mm": "500-800",
+        "kurakligaDuyarlilik": "medium-high"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "sunflower",
+      "ecocropCode": 46,
+      "bilimselAd": "Helianthus annuus",
+      "ad": {
+        "en": "Sunflower",
+        "tr": "Ayçiçeği"
+      },
+      "grup": "oilseed",
+      "donaDayanikli": null,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "KTMP -10°C: listedeki en düşük değer, beklenmedik görünüyor; FAO sitesinden kontrol edilecek.",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Sunflower' 125-130 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Sunflower",
+        "mm": "600-1000",
+        "kurakligaDuyarlilik": "low-medium"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "sugarbeet",
+      "ecocropCode": 1598,
+      "bilimselAd": "Beta vulgaris",
+      "ad": {
+        "en": "Sugar beet",
+        "tr": "Şeker pancarı"
+      },
+      "grup": "root",
+      "donaDayanikli": null,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Tabloda 4 Beta vulgaris satırı var; 'Sugar beet' (v vulgaris) seçildi. Diğerleri: Spinach beet, Garden beet, Swiss chard.",
+      "tipikSureAy": 7,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Sugarbeet' 160-230 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Sugarbeet",
+        "mm": "550-750",
+        "kurakligaDuyarlilik": "low-medium"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "potato",
+      "ecocropCode": 1,
+      "bilimselAd": "Solanum tuberosum",
+      "ad": {
+        "en": "Potato",
+        "tr": "Patates"
+      },
+      "grup": "root",
+      "donaDayanikli": null,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Potato' 105-145 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Potato",
+        "mm": "500-700",
+        "kurakligaDuyarlilik": "high"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "canola",
+      "ecocropCode": 89,
+      "bilimselAd": "Brassica napus",
+      "ad": {
+        "en": "Canola (rapeseed)",
+        "tr": "Kanola"
+      },
+      "grup": "oilseed",
+      "donaDayanikli": true,
+      "kislikEkilebilir": true,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Tabloda 'Swede rap' adıyla geçiyor. Diğer satır 'Rutabaga' alınmadı. Dayanma üst sınırı 41°C yüksek görünüyor; kontrol edilecek.",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek.",
+      "kislikSureAy": 10,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek."
+    },
+    {
+      "id": "chickpea",
+      "ecocropCode": 52,
+      "bilimselAd": "Cicer arietinum",
+      "ad": {
+        "en": "Chickpea",
+        "tr": "Nohut"
+      },
+      "grup": "legume",
+      "donaDayanikli": null,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "KTMP -9°C düşük görünüyor; FAO sitesinden kontrol edilecek.",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek.",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "lentil",
+      "ecocropCode": 56,
+      "bilimselAd": "Lens culinaris",
+      "ad": {
+        "en": "Lentil",
+        "tr": "Mercimek"
+      },
+      "grup": "legume",
+      "donaDayanikli": true,
+      "kislikEkilebilir": true,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 5,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Lentil' 150-170 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": 8,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek."
+    },
+    {
+      "id": "bean",
+      "ecocropCode": 61,
+      "bilimselAd": "Phaseolus vulgaris",
+      "ad": {
+        "en": "Common bean",
+        "tr": "Fasulye"
+      },
+      "grup": "legume",
+      "donaDayanikli": false,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 3,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Bean dry' 95-110 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Bean",
+        "mm": "300-500",
+        "kurakligaDuyarlilik": "medium-high"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "soybean",
+      "ecocropCode": 7,
+      "bilimselAd": "Glycine max",
+      "ad": {
+        "en": "Soybean",
+        "tr": "Soya"
+      },
+      "grup": "legume",
+      "donaDayanikli": false,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 5,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Soybean' 135-150 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Soybean",
+        "mm": "450-700",
+        "kurakligaDuyarlilik": "low-medium"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "vetch",
+      "ecocropCode": 768,
+      "bilimselAd": "Vicia sativa",
+      "ad": {
+        "en": "Common vetch",
+        "tr": "Fiğ"
+      },
+      "grup": "legume",
+      "donaDayanikli": true,
+      "kislikEkilebilir": true,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Tabloda 2 satır var; 'Common vetch' (s. sativa) seçildi. Diğeri 'Blackpod vetch' (s. nigra, KTMP -5). Addaki '*' işaretinin anlamı bilinmiyor.",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek.",
+      "kislikSureAy": 8,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek."
+    },
+    {
+      "id": "cowpea",
+      "ecocropCode": 30,
+      "bilimselAd": "Vigna unguiculata",
+      "ad": {
+        "en": "Cowpea",
+        "tr": "Börülce"
+      },
+      "grup": "legume",
+      "donaDayanikli": false,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Tabloda 3 satır var; 'Cowpea' (unguic.) seçildi. 'Sowpea' satırı tutarsız olduğu için alınmadı; 'Asparagus bean' farklı bir tür.",
+      "tipikSureAy": 3,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek.",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "rice",
+      "ecocropCode": 4,
+      "bilimselAd": "Oryza sativa",
+      "ad": {
+        "en": "Rice (paddy)",
+        "tr": "Çeltik (sulu pirinç)"
+      },
+      "grup": "cereal",
+      "donaDayanikli": false,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Tabloda 5 pirinç satırı var; ekip kararıyla su altında yetiştirilen 'Rice, paddy (Indica)' kullanılıyor.",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Rice' 90-150 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Rice (paddy)",
+        "mm": "450-700",
+        "kurakligaDuyarlilik": "high"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "sorghum",
+      "ecocropCode": 1219,
+      "bilimselAd": "Sorghum bicolor",
+      "ad": {
+        "en": "Sorghum",
+        "tr": "Sorgum"
+      },
+      "grup": "cereal",
+      "donaDayanikli": false,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Tabloda rakıma göre 3 satır var. Ekip kararı: 'low altitude' satırının en iyi sıcaklık aralığı (27–35°C) sorgumu serin ve yüksek yerlerde haksız yere uygunsuz gösteriyordu; daha geniş aralığı olan 'med. altitude' seçildi.",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Sorghum' 120-130 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Sorghum/Millet",
+        "mm": "450-650",
+        "kurakligaDuyarlilik": "low"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "pearlmillet",
+      "ecocropCode": 195,
+      "bilimselAd": "Pennisetum glaucum",
+      "ad": {
+        "en": "Pearl millet",
+        "tr": "İnci darısı"
+      },
+      "grup": "cereal",
+      "donaDayanikli": null,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Millet' 105-140 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Sorghum/Millet",
+        "mm": "450-650",
+        "kurakligaDuyarlilik": "low"
+      },
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "cassava",
+      "ecocropCode": 5,
+      "bilimselAd": "Manihot esculenta",
+      "ad": {
+        "en": "Cassava",
+        "tr": "Manyok"
+      },
+      "grup": "root",
+      "donaDayanikli": null,
+      "kislikEkilebilir": false,
+      "uzunSureli": true,
+      "duzeltme": {},
+      "not": "Yetişme süresi 180–365 gün; 365 tablonun üst sınırı, yani ürün tarlada bir yıldan uzun kalıyor olabilir. Rotasyon girişi 12 aydan uzun bir dönemi anlatamaz (ekim ve hasat yalnızca ay olarak giriliyor). Ekip kararıyla listede tutuluyor.",
+      "tipikSureAy": 12,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek.",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "sweetpotato",
+      "ecocropCode": 22,
+      "bilimselAd": "Ipomoea batatas",
+      "ad": {
+        "en": "Sweet potato",
+        "tr": "Tatlı patates"
+      },
+      "grup": "root",
+      "donaDayanikli": null,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "",
+      "tipikSureAy": 4,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "Ekip bilgisi (14 Kasım 2026). Ekip ayrıca bir tarım kaynağından kontrol edecek; değişirse güncellenecek.",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": null,
+      "kislikSureKaynak": null
+    },
+    {
+      "id": "groundnut",
+      "ecocropCode": 24,
+      "bilimselAd": "Arachis hypogaea",
+      "ad": {
+        "en": "Groundnut (peanut)",
+        "tr": "Yer fıstığı"
+      },
+      "grup": "legume",
+      "donaDayanikli": false,
+      "kislikEkilebilir": false,
+      "uzunSureli": false,
+      "duzeltme": {},
+      "not": "Dayanma üst sınırı 45°C yüksek görünüyor; kontrol edilecek.",
+      "tipikSureAy": 5,
+      "tipikSureOnay": true,
+      "tipikSureKaynak": "FAO sulama el kitabı (Training Manual No. 3) 'Peanut/Groundnut' 130-140 gün; orta değer aya yuvarlandı. Ekip onayladı (14 Kasım 2026).",
+      "kislikSureAy": null,
+      "faoSuIhtiyaci": {
+        "satir": "Peanut",
+        "mm": "500-700",
+        "kurakligaDuyarlilik": "low-medium"
+      },
+      "kislikSureKaynak": null
+    }
+  ]
+}

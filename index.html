@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DECO — Crop rotation decisions with NASA data</title>
+  <!-- Sayfa adresine göre hangi bölümün görüneceği, sayfa çizilmeden önce belirlenir (titreme olmasın diye) -->
+  <script>document.documentElement.dataset.route = ["plan", "farmers", "about", "profile"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "home";</script>
+  <!-- Sekme simgesi: logodaki yeşil yaprak (ayrı dosya yok; tarayıcının favicon.ico araması 404 vermesin diye) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 22c5-3 8-7 8-12a8 8 0 0 0-16 0c0 5 3 9 8 12z' fill='%231f6f43'/%3E%3Cpath d='M12 18V9m0 4l-3-2m3 0l3-3' stroke='%23fff' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Renk süzgeci: kırmızı ve mavi bileşenleri yer değiştirir. Yeraltı suyu katmanında kullanılır (css/style.css). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="swapRedBlue" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0 0 1 0 0  0 1 0 0 0  1 0 0 0 0  0 0 0 1 0"/>
+    </filter>
+  </svg>
+
+  <!-- Üst çubuk: logo, menü, (yalnızca plan sayfasında) arama ve konum, dil -->
+  <header class="topbar">
+    <a class="brand" href="#home">
+      <!-- Logo: yeşil yaprak, içinde beyaz filiz çizgisi (ekip kararı, 15 Kasım 2026: arkasındaki krem daire kaldırıldı) -->
+      <svg class="brand-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c5-3 8-7 8-12a8 8 0 0 0-16 0c0 5 3 9 8 12z" fill="#1f6f43"/><path d="M12 18V9m0 4l-3-2m3 0l3-3" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+      <span class="brand-name">DECO</span>
+    </a>
+
+    <!-- Menü: masaüstünde ortada (logo solda, dil seçici sağda) -->
+    <nav class="tabs" id="tabs" aria-label="Pages">
+      <a class="tab" href="#home" data-route="home" data-i18n="navHome">Home</a>
+      <a class="tab" href="#plan" data-route="plan" data-i18n="navPlan">Plan my field</a>
+      <a class="tab" href="#farmers" data-route="farmers" data-i18n="navFarmers">From the Field</a>
+      <a class="tab" href="#about" data-route="about" data-i18n="navAbout">About us</a>
+    </nav>
+
+    <!-- Sağ grup: (yalnızca plan sayfasında) arama ve konum, dil. Menü sekmeleri ortada durur. -->
+    <div class="topbar-actions">
+      <div class="search plan-only">
+      <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="searchInput" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="Search a village, town or city">
+      <ul id="searchResults" class="search-results" hidden></ul>
+      </div>
+      <button class="btn btn-soft plan-only" id="locateBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5" fill="currentColor"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2"/></svg>
+        <span data-i18n="locate">Use my location</span>
+      </button>
+      <!-- Tarla profili (prototip): her sayfada görünür -->
+      <a class="profile-link" id="profileLink" href="#profile" data-i18n="navProfile">My field</a>
+      <select id="langSel" class="lang" aria-label="Language">
+        <option value="en">English</option>
+        <option value="tr">Türkçe</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="stage" id="pagePlan">
+    <div id="map"></div>
+
+    <!-- Sol: katman seçimi -->
+    <nav class="card layers" aria-label="Layers">
+      <p class="card-label" data-i18n="layersTitle">Show on map</p>
+      <div id="layerList" class="layer-list"></div>
+      <button class="more-btn" id="moreBtn" data-i18n="moreLayers">More layers</button>
+      <div id="moreList" class="layer-list" hidden></div>
+    </nav>
+
+    <!-- Sağ: katman açıklaması + seçilen tarla -->
+    <aside class="side">
+      <section class="card info" id="infoCard">
+        <button class="info-head" id="infoToggle" aria-expanded="true">
+          <span class="info-icon" id="infoIcon"></span>
+          <span class="info-title" id="infoTitle"></span>
+          <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </button>
+        <div class="info-body">
+          <p class="plain" id="infoPlain"></p>
+          <div class="legend" id="infoLegend"></div>
+          <details class="science">
+            <summary data-i18n="scienceDetail">Science details</summary>
+            <p id="infoScience"></p>
+            <p class="source" id="infoSource"></p>
+          </details>
+        </div>
+      </section>
+
+      <!-- Tarla seçilmeden önce -->
+      <section class="card hint" id="hintCard">
+        <p class="hint-title" data-i18n="hintTitle">Where is your field?</p>
+        <p class="hint-text" data-i18n="hintText">Tap your field on the map, search for a place above, or use your location.</p>
+      </section>
+
+      <!-- Tarla seçildikten sonra -->
+      <section class="card field" id="fieldCard" hidden>
+        <div class="field-head">
+          <div>
+            <p class="card-label" data-i18n="yourField">Selected place</p>
+            <p class="field-name" id="fieldName">—</p>
+            <p class="field-coords" id="fieldCoords"></p>
+          </div>
+          <button class="icon-btn" id="fieldClose" aria-label="Close">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        <p class="field-status" id="fieldStatus"></p>
+
+        <div class="facts" id="facts" hidden>
+          <div class="fact">
+            <span class="fact-label" data-i18n="factRain">Yearly rain</span>
+            <span class="fact-value" id="factRain">—</span>
+          </div>
+          <div class="fact">
+            <span class="fact-label" data-i18n="factHot">Hottest month</span>
+            <span class="fact-value" id="factHot">—</span>
+          </div>
+          <div class="fact">
+            <span class="fact-label" data-i18n="factFrost">Frost risk</span>
+            <span class="fact-value" id="factFrost">—</span>
+          </div>
+        </div>
+
+        <p class="yani" id="fieldYani"></p>
+
+        <div class="chart-wrap" id="chartWrap" hidden>
+          <div class="seg" role="tablist">
+            <button class="seg-btn active" data-chart="rain" data-i18n="tabRain">Rain</button>
+            <button class="seg-btn" data-chart="temp" data-i18n="tabTemp">Temperature</button>
+          </div>
+          <canvas id="fieldChart" height="150"></canvas>
+          <p class="chart-note" data-i18n="chartNote">Years 2001–2024, NASA POWER</p>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="createRotation" data-i18n="createRotation">Create a plan for this field</button>
+      </section>
+    </aside>
+
+    <!-- Alt: zaman çizelgesi -->
+    <section class="card timeline">
+      <button class="play" id="playBtn">
+        <svg viewBox="0 0 24 24" width="18" height="18" id="playIcon" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        <span id="playLabel" data-i18n="play">Play the past</span>
+      </button>
+      <div class="tl-body">
+        <div class="tl-top">
+          <span class="tl-date"><b id="tlYear">—</b> <span id="tlMonth"></span></span>
+          <label class="speed">
+            <span data-i18n="speed">Speed</span>
+            <select id="speedSel">
+              <option value="1200">1x</option>
+              <option value="700" selected>2x</option>
+              <option value="350">4x</option>
+            </select>
+          </label>
+        </div>
+        <input type="range" id="timeSlider" min="0" max="0" value="0" step="1" aria-label="Date">
+        <div class="tl-range"><span id="rangeStart"></span><span id="rangeEnd"></span></div>
+      </div>
+    </section>
+
+    <!-- Tarla planı: masaüstünde ekranın sağ üçte ikisi, mobilde tam ekran -->
+    <section class="plan" id="planPanel" aria-labelledby="planTitle" hidden>
+      <header class="plan-head">
+        <div>
+          <p class="card-label" data-i18n="planLabel">Field plan</p>
+          <h2 class="plan-title" id="planTitle">—</h2>
+          <p class="field-coords" id="planCoords"></p>
+        </div>
+        <button class="btn btn-soft" id="planClose" data-i18n="backToMap">Back to map</button>
+      </header>
+
+      <div class="plan-body" id="planBody">
+        <!-- Tarla takvimi -->
+        <section class="plan-sec">
+          <h3 data-i18n="calTitle">Your field's year</h3>
+          <p class="plan-lead" id="calLead"></p>
+          <div id="calBody">
+            <div class="cal" id="calGrid"></div>
+            <p class="cal-legend">
+              <span data-i18n="calLegendRain">Blue bar: average rain in that month (mm)</span>
+              <span data-i18n="calLegendTemp">Coloured box: average temperature (°C)</span>
+              <span data-i18n="calLegendFrost">❄ Frost risk</span>
+            </p>
+            <p class="yani" id="calYani"></p>
+            <details class="science">
+              <summary data-i18n="scienceDetail">Science details</summary>
+              <p data-i18n="calScience"></p>
+            </details>
+          </div>
+        </section>
+
+        <!-- Form -->
+        <form class="plan-sec" id="planForm" novalidate>
+          <h3 data-i18n="formTitle">Tell us about your field</h3>
+          <p class="plan-lead" data-i18n="formLead">Your answers stay on this device and will shape the crop rotation options you see in the next step.</p>
+
+          <fieldset class="q">
+            <legend data-i18n="qRotation">What do you grow now?</legend>
+            <p class="q-help" data-i18n="rotationHelp">Add your crops in the order you grow them, and pick the month you sow and the month you harvest each one. If you leave the field empty for a year, choose "Fallow (empty year)". Up to 6 rows.</p>
+            <div id="rotationRows"></div>
+            <button type="button" class="btn btn-soft btn-small" id="addPeriod" data-i18n="addPeriod">+ Add another crop</button>
+            <p class="rot-info" id="rotationInfo" hidden></p>
+
+            <!-- Ürüne göre aylar: rotasyondaki her ürün için 12 aylık şerit -->
+            <div id="cropCal" hidden>
+              <p class="crop-cal-head" data-i18n="cropCalHead">How each month's usual weather suits your crops</p>
+              <p class="cal-legend" data-i18n="cropLegend">✓ suitable · ~ borderline · z winter pause · ✕ not suitable · faded: months the crop is not in the field</p>
+              <div id="cropCalList"></div>
+            </div>
+            <details class="science">
+              <summary data-i18n="scienceDetail">Science details</summary>
+              <p data-i18n="cropScience">Crop data source: FAO ECOCROP (via the Recocrop package).</p>
+            </details>
+          </fieldset>
+
+          <fieldset class="q">
+            <legend data-i18n="qSoil">What is your soil like?</legend>
+            <div class="choices" id="soilChoices"></div>
+          </fieldset>
+
+          <fieldset class="q">
+            <legend data-i18n="qWater">Can you irrigate the field?</legend>
+            <div class="choices" id="waterChoices"></div>
+          </fieldset>
+
+          <fieldset class="q">
+            <legend data-i18n="qSlope">How steep is your field?</legend>
+            <div class="choices" id="slopeChoices"></div>
+          </fieldset>
+
+          <fieldset class="q">
+            <legend data-i18n="qPriorities">How much does each of these matter to you?</legend>
+            <p class="q-help" data-i18n="prioHelp">Set each slider: 1 = not important to me, 5 = very important.</p>
+            <div id="prioList"></div>
+          </fieldset>
+
+          <fieldset class="q">
+            <legend data-i18n="qSell">Which crops can you sell easily in your area?</legend>
+            <p class="q-help" data-i18n="sellHelp">Pick as many as you like. We do not calculate money; we only favour these crops. If you pick none, the sellability score is left out.</p>
+            <div class="chips" id="sellChoices"></div>
+          </fieldset>
+
+          <p class="form-error" id="formError" role="alert" hidden></p>
+          <div class="plan-actions">
+            <button type="submit" class="btn btn-primary" data-i18n="continueBtn">Continue</button>
+            <button type="button" class="btn btn-soft" id="planReset" data-i18n="resetAnswers">Reset answers</button>
+          </div>
+        </form>
+
+        <!-- "Devam"dan sonra: yanıtların özeti -->
+        <section class="plan-sec" id="planSummary" hidden>
+          <h3 data-i18n="summaryTitle">Your answers</h3>
+          <dl class="summary-list" id="summaryList"></dl>
+        </section>
+
+        <!-- Aşama 3: mevcut rotasyon + en fazla iki alternatif (kural tabanlı karşılaştırma) -->
+        <section class="plan-sec plan-wide" id="planOptions" hidden>
+          <h3 data-i18n="optionsTitle">Rotation options</h3>
+          <p class="plan-lead" data-i18n="optionsLead">Your rotation and up to two alternatives produced by simple rules. The scores are not a forecast; they are a rule-based comparison.</p>
+          <p class="opt-strong" id="optionNote" hidden></p>
+
+          <!-- Aşama 4: "gelecek iklim" kaydırıcıları. Kartlar sabit kalır; puanlar ve riskler yeniden hesaplanır. -->
+          <div class="future-box" id="futureBox">
+            <h4 data-i18n="futureTitle">What if the climate changes?</h4>
+            <p class="future-disclaimer" data-i18n="futureDisclaimer">This is not a forecast; it is a comparison showing what our rules would say if the climate changed.</p>
+            <div class="future-row">
+              <label for="futureTemp" data-i18n="futureTempLabel">Temperature</label>
+              <input type="range" id="futureTemp" min="0" max="3" step="1" value="0">
+              <output id="futureTempVal" for="futureTemp"></output>
+            </div>
+            <div class="future-row">
+              <label for="futureRain" data-i18n="futureRainLabel">Rain</label>
+              <input type="range" id="futureRain" min="-30" max="10" step="10" value="0">
+              <output id="futureRainVal" for="futureRain"></output>
+            </div>
+            <button type="button" class="btn btn-soft future-reset" id="futureReset" data-i18n="futureReset">Back to today</button>
+            <p class="future-yani" id="futureYani"></p>
+            <p class="future-warn" id="futureWarn" hidden></p>
+            <p class="future-alt" id="futureAlt" hidden></p>
+            <details class="science">
+              <summary data-i18n="scienceDetail">Science details</summary>
+              <p id="futureScience"></p>
+            </details>
+          </div>
+          <!-- Mobilde kaydırıcı kutusu ekrandan çıkınca üstte kalan tek satırlık özet -->
+          <div class="future-sticky" id="futureSticky" hidden><button type="button" id="futureStickyBtn"></button></div>
+
+          <div class="opt-grid" id="optionCards"></div>
+          <!-- "Bu seçeneği incele": seçilen kartın ayrıntı paneli (js/cards.js, Cards.detail) -->
+          <div class="opt-detail" id="optionDetail" hidden></div>
+          <!-- Toprak yönlerinin açıklaması: kartlarda tekrar etmek yerine bir kez -->
+          <p class="opt-soil-note" id="soilNote"></p>
+          <!-- "Başka fikirler": çiftçinin rotasyonundan bağımsız, en çok 3 fikir; her zaman görünür, başta kapalı -->
+          <details class="ideas" id="ideasBox">
+            <summary id="ideasSummary"></summary>
+            <h4 id="ideasTitle"></h4>
+            <p class="plan-lead" id="ideasLead"></p>
+            <p class="ideas-unknown" id="ideasUnknown"></p>
+            <div class="opt-grid" id="ideaCards"></div>
+            <div class="opt-detail" id="ideaDetail" hidden></div>
+          </details>
+          <details class="science">
+            <summary data-i18n="scienceDetail">Science details</summary>
+            <p id="optionScience"></p>
+          </details>
+        </section>
+
+        <p class="expert-note" data-i18n="expertNote">This tool supports your decision; it does not replace it. Talk to a local agricultural adviser before changing what you plant.</p>
+        <!-- Yorum formu açılana kadar bağlantının yanında "yakında" bilgisi görünür (js/pages.js, COMMENT_FORM_URL) -->
+        <p class="farmers-link"><a href="#farmers" data-i18n="farmersLink">What do farmers in this region say? →</a><span id="planFormSoon"><span class="soon-badge" data-i18n="soonBadge">Coming soon</span> <span class="soon-text" data-i18n="farmersLinkSoon">No comments yet; the comment form will open soon.</span></span></p>
+      </div>
+
+      <!-- Mobilde plan haritayı tümüyle örttüğü için harita atfı burada tekrar gösterilir -->
+      <p class="plan-attrib" id="planAttrib"></p>
+    </section>
+
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+
+  <!-- ================= Ana sayfa ================= -->
+  <div class="page" id="pageHome" hidden>
+    <!-- Hikâye: aynı bölgenin üç NASA GIBS görüntüsü. Masaüstünde sahne yerinde durur ve kaydırdıkça kare değişir
+         (GSAP); mobilde, "hareketi azalt" açıkken ya da GSAP yüklenemezse kareler alt alta düz bölümlerdir.
+         Karolar js/pages.js'te eklenir (data-layer: js/layers.js'teki katman kısa adı). -->
+    <section class="story stacked" id="homeStory">
+      <div class="frame frame-hero" data-layer="ndvi">
+        <div class="frame-copy">
+          <p class="kicker" data-i18n="brandSub">Crop rotation decisions with NASA data</p>
+          <h1 id="homeTitle" data-i18n="homeTitle">Your rotation, next to two others.</h1>
+          <p class="hero-lead" data-i18n="homeLead">Pick your field anywhere on Earth. See what 25 years of NASA data say about your area, then compare three crop rotations.</p>
+          <a class="cta" href="#plan" data-i18n="homeCta">Plan my field →</a>
+        </div>
+        <p class="frame-src"></p>
+      </div>
+      <div class="frame frame-cap" data-layer="ndvi">
+        <div class="frame-copy">
+          <p class="kicker frame-kicker"></p>
+          <h2 data-i18n="storyNdviTitle">Satellites have watched your fields for 25 years.</h2>
+          <p data-i18n="storyNdviText">How green the land is, month by month, since 2001. The picture shows your region, not a single field.</p>
+        </div>
+        <p class="frame-src"></p>
+      </div>
+      <div class="frame" data-layer="soil">
+        <div class="frame-copy">
+          <p class="kicker frame-kicker"></p>
+          <h2 data-i18n="storySoilTitle">NASA has estimated how wet the soil is, month by month, since 2001.</h2>
+          <p data-i18n="storySoilText">This is a model-assisted product (GLDAS), not a direct measurement.</p>
+        </div>
+        <p class="frame-src"></p>
+      </div>
+      <div class="frame" data-layer="temp">
+        <div class="frame-copy">
+          <p class="kicker frame-kicker"></p>
+          <h2 data-i18n="storyThirdTitle">Temperature, month by month, since 2001.</h2>
+          <p data-i18n="storyThirdText">From NASA's MERRA-2 record. For the scores of your own field we use NASA POWER data for your area.</p>
+        </div>
+        <p class="frame-src"></p>
+      </div>
+      <div class="story-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    </section>
+
+    <section class="band">
+      <div class="cmp">
+        <div class="reveal">
+          <h2 class="big" data-i18n="homeCompareTitle">With this data, we compare your rotation with two alternatives.</h2>
+          <p data-i18n="homeCompareText">Each option comes with its reasons, the data behind it, what we do not know, and its risks.</p>
+          <p class="yani-line" data-i18n="homeCompareYani">In other words: you and your local adviser decide. This is a rule-based comparison, not a forecast.</p>
+        </div>
+        <!-- Örnek: Konya'nın gerçek puanları (js/pages.js içindeki HOME_EXAMPLE) -->
+        <div id="homeStrips"></div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="steps4" id="homeSteps">
+        <div><b>1</b><h3 data-i18n="homeStep1">Find your field</h3><p data-i18n="homeStep1Text">Search, tap the map, or use your location.</p></div>
+        <div><b>2</b><h3 data-i18n="homeStep2">Play the past</h3><p data-i18n="homeStep2Text">Six NASA layers, 2001 to 2026.</p></div>
+        <div><b>3</b><h3 data-i18n="homeStep3">Describe your field</h3><p data-i18n="homeStep3Text">Crops, soil, water, priorities.</p></div>
+        <div><b>4</b><h3 data-i18n="homeStep4">Compare, then test the climate</h3><p data-i18n="homeStep4Text">Three rotations; warmer and drier sliders.</p></div>
+      </div>
+      <!-- Sayılar koddan gelir: katman sayısı, iklim kaydının yılı, ürün sayısı (js/pages.js) -->
+      <div class="nums" id="homeNums">
+        <div><b id="numLayers">6</b><span data-i18n="homeNumLayers">NASA map layers</span></div>
+        <div><b id="numYears">24</b><span data-i18n="homeNumYears">years of climate record</span></div>
+        <div><b id="numCrops">20</b><span data-i18n="homeNumCrops">crops</span></div>
+        <div><b id="numZero">0</b><span data-i18n="homeNumZero">accounts, trackers or AI models</span></div>
+      </div>
+    </section>
+
+    <section class="band band-dark">
+      <h2 class="big reveal" data-i18n="homeEndTitle">See it for your own field.</h2>
+      <a class="cta reveal" href="#plan" data-i18n="homeCta">Plan my field →</a>
+      <p class="fine" data-i18n="homeEndNote">Data: NASA GIBS, NASA POWER, FAO ECOCROP, © OpenStreetMap contributors. Satellite data describe the region around a field, not the single field.</p>
+    </section>
+  </div>
+
+  <!-- ================= Çiftçi yorumları (yer tutucu; uydurma ya da örnek yorum YOK) ================= -->
+  <div class="page" id="pageFarmers" hidden>
+    <section class="band band-first">
+      <p class="kicker dark" data-i18n="farmersKicker">Farmers' comments</p>
+      <h1 class="big" data-i18n="navFarmers">From the Field</h1>
+      <p class="lead"><b data-i18n="farmersTitle">What do farmers in this region say?</b></p>
+      <p data-i18n="farmersLead">Farmers will be able to share what worked on their own land. Comments will be shown by region, in the farmer's own words.</p>
+      <div class="empty-box reveal">
+        <p class="empty-title" data-i18n="farmersEmpty">There are no comments yet. Be the first to write one.</p>
+        <!-- Form bağlantısı ekipten gelince js/pages.js içindeki COMMENT_FORM_URL doldurulur: "yakında" satırı gider, düğme görünür -->
+        <!-- Bağlantı yokken: çalışmayan "Yakında" düğmesi + açıklama (hiçbir şey göndermez). Bağlantı gelince: forma giden düğme (yeni sekme). -->
+        <p class="form-soon" id="commentFormSoon" data-i18n="farmersFormSoon">The comment form will open soon. Until the link arrives this button does nothing and sends nothing.</p>
+        <button type="button" class="cta cta-small cta-off" id="commentFormOff" disabled data-i18n="soonBadge">Coming soon</button>
+        <a class="cta cta-small" id="commentFormLink" target="_blank" rel="noopener" hidden data-i18n="farmersWrite">Write a comment →</a>
+      </div>
+      <h2 class="mid" data-i18n="farmersRulesTitle">How comments will work</h2>
+      <ul class="plain-list">
+        <li data-i18n="farmersRule1">We do not write comments ourselves and we do not show example comments.</li>
+        <li data-i18n="farmersRule2">Identity is not verified. A comment is one farmer's personal experience; it is not advice. Your field may be different.</li>
+        <li data-i18n="farmersRule3">Only a first name and the district are shown, never a surname, phone number, e-mail or the location of a field.</li>
+        <li data-i18n="farmersRule4">Comments are shown in the language they were written in.</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ================= Hakkımızda ================= -->
+  <div class="page" id="pageAbout" hidden>
+    <section class="band band-first">
+      <p class="kicker dark" data-i18n="aboutKicker">NASA Space Apps Challenge 2026 · Field Shift challenge</p>
+      <h1 class="big" data-i18n="aboutTitle">About DECO</h1>
+      <p class="lead" data-i18n="aboutLead">DECO (from crop rotation DECisiOn) helps a farmer compare the rotation they grow today with two alternatives, using NASA data for their area.</p>
+
+      <h2 class="mid" data-i18n="aboutHowTitle">How to use it</h2>
+      <ol class="plain-list" id="aboutHow">
+        <li data-i18n="aboutHow1">Choose your field: on the "Plan my field" page, search for a place, press "Use my location" or click on the map.</li>
+        <li data-i18n="aboutHow2">Look at the past: pick a NASA layer and press "Play the past". The field card shows a 2001–2024 rain and temperature summary for your area.</li>
+        <li data-i18n="aboutHow3">Describe your field: press "Create a plan for this field" and enter your current rotation (crop, sowing month, harvest month), soil, water, slope, your priorities and the crops you can sell easily.</li>
+        <li data-i18n="aboutHow4">Compare three rotations: your own rotation next to up to two alternatives. "Look into this option" shows how the scores came out and a transition calendar.</li>
+        <li data-i18n="aboutHow5">Move the "What if the climate changes?" sliders; if you like, save your field on the "My field" page and keep a monthly note. Talk to a local agricultural adviser before you decide.</li>
+      </ol>
+
+      <h2 class="mid" data-i18n="aboutTeamTitle">Team</h2>
+      <p data-i18n="aboutTeam">DECO Team</p>
+
+      <h2 class="mid" data-i18n="aboutChallengeTitle">The challenge</h2>
+      <p data-i18n="aboutChallenge">The challenge asks for a tool that compares at least three crop rotations, including the one the farmer uses now, and shows for each why it is suggested, the data behind it, its benefits, what is not known, and its risks.</p>
+
+      <h2 class="mid" data-i18n="aboutMethodTitle">How it works, honestly</h2>
+      <ul class="plain-list reveal">
+        <li data-i18n="aboutMethod1">The comparison is rule-based. It is not artificial intelligence, not a forecast and not a crop growth model.</li>
+        <li data-i18n="aboutMethod2">Climate comes from NASA POWER (2001–2024 monthly averages); crop needs come from FAO ECOCROP.</li>
+        <li data-i18n="aboutMethod3">Each rotation gets six scores from 1 to 5: climate fit, water, nitrogen, soil cover, pest cycle and sellability. Your priorities set the weights.</li>
+        <li data-i18n="aboutMethod4">Alternatives change one thing in your rotation: they fill an empty period or replace one crop.</li>
+        <li data-i18n="aboutMethod5">Some thresholds were chosen by the team and were tried in only six places. The site marks them as such.</li>
+        <li data-i18n="aboutMethod6">Satellite and climate data describe the region around a field, not the single field. Talk to a local adviser before changing what you plant.</li>
+      </ul>
+
+      <!-- Gelecek planları: hiçbiri henüz yapılmadı; sayfada açıkça yazıyor -->
+      <h2 class="mid" data-i18n="aboutFutureTitle">Future plans</h2>
+      <p><b data-i18n="aboutFutureLead">These are plans; none of them is done yet.</b></p>
+      <ul class="plain-list" id="aboutFuture">
+        <li data-i18n="aboutFuture1">Real accounts, so that a profile can be opened from other devices (for now the profile is a prototype that lives only in the browser).</li>
+        <li data-i18n="aboutFuture2">Improving the rules with farmers' notes and comments.</li>
+        <li data-i18n="aboutFuture3">Training modules: short, plain explanations of crop rotation and soil health.</li>
+        <li data-i18n="aboutFuture4">Taking the slope automatically from SRTM and the soil type from SoilGrids (we have not tried these two sources yet).</li>
+        <li data-i18n="aboutFuture5">More crops.</li>
+        <li data-i18n="aboutFuture6">Sowing-time alerts based on short-term weather forecasts (Meteomatics).</li>
+        <li data-i18n="aboutFuture7">Our own domain name.</li>
+      </ul>
+
+      <h2 class="mid" data-i18n="aboutSourcesTitle">Sources</h2>
+      <p data-i18n="aboutSourcesLead">Only sources that the site actually uses are listed.</p>
+      <ul class="src-list" id="aboutSources"></ul>
+
+      <h2 class="mid" data-i18n="aboutLicenceTitle">Licence</h2>
+      <p data-i18n="aboutLicence">Our code is released under the MIT License. The licence covers the code only; the data and the libraries are used under their own terms.</p>
+    </section>
+  </div>
+
+  <!-- ================= Tarla profili: PROTOTİP. Hesap/şifre/e-posta yok; veriler yalnızca bu tarayıcıda (js/profile.js) ================= -->
+  <div class="page" id="pageProfile" hidden>
+    <section class="band band-first">
+      <p class="kicker dark" data-i18n="profileKicker">Prototype</p>
+      <h1 class="big" data-i18n="profileTitle">My field</h1>
+      <p class="proto-warn" id="profileWarn" data-i18n="profileWarn">Prototype: data is stored only in this browser. In the future, farmers' notes will be used to improve the rules.</p>
+      <div id="profileBody"></div>
+    </section>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- GSAP: yalnızca içerik sayfalarındaki (ana sayfa, çiftçiler, hakkımızda) kaydırma animasyonları için. Harita ve plan
+       sayfasında kullanılmaz. Yüklenemezse site animasyonsuz çalışır. Lisans: gsap.com/standard-license (README'de yazıyor). -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/ScrollTrigger.min.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/layers.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/field.js"></script>
+  <script src="js/crops.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/rotation.js"></script>
+  <script src="js/future.js"></script>
+  <script src="js/cards.js"></script>
+  <script src="js/plan.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/pages.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# ECOCROP tablosunun kopyası depoya ve yayımlanan siteye girmez.
+# tools/build_crops.py dosya yoksa onu kendisi indirir.
+tools/ecocrop.rds
+*.rds
+
+# Python'un ara dosyaları
+__pycache__/
+*.pyc
+
+# İşletim sistemi ve editör artıkları
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.tmp
+*.bak
+*.log
+
+# Çalışma notları ve Claude Code dosyaları (yanlışlıkla bu klasöre kopyalanırsa)
+CLAUDE.md
+OZET.md
+.claude/
+
+# Test dosyaları ve ekran görüntüleri (yanlışlıkla bu klasöre kopyalanırsa)
+test/
+tests/
+screenshots/
+ekran-goruntuleri/
+/*.png
+/*.jpg
+report.txt
