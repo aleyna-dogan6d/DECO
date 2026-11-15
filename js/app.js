@@ -91,9 +91,18 @@ function goTo(idx) {
   Field.setYear(f.y);
 }
 
+// Oynatma (kritik hata düzeltmesi, 15 Kasım 2026): 4x hızda harita "donuyordu", çünkü bir ayın karoları
+// yüklenmeden sıradaki aya geçiliyor, yarım kalan katman atılıyor ve ekrandaki görüntü hiç değişmiyordu
+// (tarih ilerliyor, harita aynı kalıyordu). Artık:
+// - her zaman TEK zamanlayıcı vardır (hız değişince eskisi temizlenir, yenisi kurulur);
+// - bir ayın karoları yüklenmeden sıradaki aya geçilmez;
+// - karolar PLAY_MAX_WAIT içinde gelmezse o ay atlanır: oynatma asla takılı kalmaz.
+const PLAY_MAX_WAIT = 4000; // ms
+
 function setPlaying(on) {
   State.playing = on;
   clearInterval(State.timer);
+  State.timer = null;
   el("playIcon").innerHTML = on
     ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor"/>'
     : '<path d="M8 5v14l11-7z" fill="currentColor"/>';
@@ -101,10 +110,15 @@ function setPlaying(on) {
   el("playBtn").setAttribute("aria-label", on ? t("pause") : t("play"));
   if (!on) return;
   if (State.index >= State.frames.length - 1) goTo(0);
+  const step = Number(el("speedSel").value); // 1x: 1200 ms, 2x: 700 ms, 4x: 350 ms
+  let waited = 0;
   State.timer = setInterval(() => {
+    // Ekrandaki ayın karoları hâlâ yükleniyorsa bekle (en çok PLAY_MAX_WAIT); sonra sıradaki aya geç
+    if (MapView.busy() && waited < PLAY_MAX_WAIT) { waited += step; return; }
+    waited = 0;
     if (State.index >= State.frames.length - 1) return setPlaying(false);
     goTo(State.index + 1);
-  }, Number(el("speedSel").value));
+  }, step);
 }
 
 // ---------- Harita ----------

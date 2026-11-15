@@ -76,6 +76,12 @@ const MapView = {
     if (this.pin) { this.map.removeLayer(this.pin); this.pin = null; }
   },
 
+  // Son istenen katmanın karoları hâlâ yükleniyor mu? Oynatma, karolar gelmeden sıradaki aya geçmemek için bakar.
+  // (Leaflet "load" olayını karoların hepsi gelince ya da hata verince tetikler; o zaman pending boşalır.)
+  busy() {
+    return Boolean(this.map && this.pending);
+  },
+
   // Katmanı verilen tarihe göre göster
   show(layer, time) {
     const url = GIBS_URL
