@@ -123,6 +123,12 @@ function pickField(lat, lng, name = null) {
   // Tarla kartına yer açmak için katman açıklamasını küçült (tıklayınca tekrar açılır)
   el("infoCard").classList.add("collapsed");
   el("infoToggle").setAttribute("aria-expanded", "false");
+  // Telefonda tarla kartı haritanın altındadır: kartın başı (ad ve iklim özeti) ekrana girecek kadar,
+  // haritayı olabildiğince görünür bırakarak sayfa aşağı kaydırılır
+  if (isMobile()) requestAnimationFrame(() => {
+    const need = el("fieldCard").getBoundingClientRect().top - (window.innerHeight - 190);
+    if (need > 0) window.scrollBy({ top: need, behavior: "smooth" });
+  });
 }
 
 function locate() {

@@ -69,13 +69,17 @@ const Future = {
     el("futureStickyBtn").addEventListener("click", () => el("futureBox").scrollIntoView({ behavior: "smooth", block: "start" }));
 
     // Mobilde kaydırıcı kutusu ekrandan çıkınca tek satırlık özet üstte sabit kalır
+    // Masaüstünde plan gövdesi kendi içinde kayar; telefonda sayfanın kendisi kayar (plan haritanın altında, akışta)
     el("planBody").addEventListener("scroll", () => this.renderSticky(), { passive: true });
+    window.addEventListener("scroll", () => this.renderSticky(), { passive: true });
   },
 
   // Kutu yukarıda kaldıysa (kullanıcı kartlara indiyse) true; kutuya henüz gelinmediyse ya da kutu gizliyse false
   boxPassed() {
     const box = el("futureBox").getBoundingClientRect();
-    return box.height > 0 && box.bottom <= el("planBody").getBoundingClientRect().top + 1;
+    // Üst sınır: masaüstünde plan gövdesinin üstü; telefonda ekranın tepesi (sayfa kaydığı için)
+    const top = isMobile() ? 0 : el("planBody").getBoundingClientRect().top;
+    return box.height > 0 && box.bottom <= top + 1;
   },
 
   reset() {

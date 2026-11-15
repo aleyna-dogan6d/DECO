@@ -105,6 +105,9 @@ const Plan = {
     document.querySelector(".stage").classList.add("plan-open");
     el("planBody").scrollTop = 0;
 
+    // Telefonda plan haritanın altında, sayfa akışında açılır: sayfa planın başına kaydırılır
+    if (isMobile()) el("planPanel").scrollIntoView({ block: "start" });
+
     // Masaüstünde tarla işaretini, katman kartı ile plan paneli arasında kalan boşluğa getir
     if (!isMobile()) {
       const mapBox = el("map").getBoundingClientRect();
@@ -119,6 +122,7 @@ const Plan = {
     el("planPanel").hidden = true;
     document.querySelector(".stage").classList.remove("plan-open");
     if (!isMobile()) MapView.focusPin();
+    else window.scrollTo(0, 0); // telefonda "Haritaya dön": sayfanın başına (haritaya) dönülür
   },
 
   renderHead() {

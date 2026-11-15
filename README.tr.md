@@ -1,14 +1,17 @@
 # DECO — NASA Space Apps 2026 · Field Shift challenge
 
-**NASA verisiyle ekim nöbeti kararları.** (DECO: İngilizce "crop rotation DECisiOn".)
+**NASA verisiyle ekim nöbeti kararları.** (DECO: ürün rotasyonu kararı için DEcision + CrOp.)
 
 *(English, for the jury: [README.md](README.md). Bu dosya ekibin Türkçe çalışma notudur.)*
+
+**Yayın adresi:** https://aleyna-dogan6d.github.io/DECO/
+**Depo:** https://github.com/aleyna-dogan6d/DECO
 
 NASA uydu verisiyle dünyanın her yerindeki çiftçilere ekim nöbeti (rotasyon) önerileri sunan web uygulaması.
 Kod MIT lisansıyla yayımlanır ([LICENSE](LICENSE)); lisans yalnızca kodu kapsar, veriler kendi sağlayıcılarının
 koşullarıyla kullanılır. Kaynakların tam listesi README.md'nin "Sources and attributions" bölümündedir.
 Bu sürümde dört aşama var: (1) dünya haritası, NASA katmanları, geçmişi oynatan zaman çizelgesi ve seçilen nokta için
-iklim özeti; (2) tarla planı formu ve tarla takvimi; (3) mevcut rotasyon + iki alternatifin kural tabanlı karşılaştırması;
+iklim özeti; (2) tarla planı formu ve tarla takvimi; (3) mevcut rotasyon + en fazla üç alternatifin kural tabanlı karşılaştırması;
 (4) "İklim değişirse ne olur?" kaydırıcıları (aynı kartların kaydırılmış iklimle yeniden puanlanması).
 
 ## Nasıl çalıştırılır
@@ -37,7 +40,7 @@ js/crops.js       ürün verisi: 20 tek yıllık ürün, FAO ECOCROP değerleri 
 js/calendar.js    tarla takvimi: tipik bir yılın 12 aylık yağış, sıcaklık ve don özeti
 js/rotation.js    rotasyon karşılaştırması: takvim, altı ölçüt (1–5), alternatif üretimi; kural tabanlıdır
 js/future.js      "gelecek iklim" kaydırıcıları: iklimi kaydırır (sıcaklık, yağış, FAO-56 Hargreaves ile buharlaşma düzeltmesi); yeni bir bitki modeli değildir
-js/cards.js       rotasyon kartları: mevcut rotasyon + en fazla iki alternatif; kanıt, bilgi boşluğu ve risk cümleleri; kaydırıcılarla yeniden puanlama; "Bu seçeneği incele" paneli (puanların gerçek sayılarla açıklaması, geçiş takvimi, yardım kutusu)
+js/cards.js       rotasyon kartları: mevcut rotasyon + en fazla üç alternatif; kanıt, bilgi boşluğu ve risk cümleleri; kaydırıcılarla yeniden puanlama; "Bu seçeneği incele" paneli (puanların gerçek sayılarla açıklaması, geçiş takvimi, yardım kutusu)
 js/pages.js       sayfalar ve menü (#home, #plan, #farmers, #about, #profile), ana sayfa hikâyesi ve animasyonlar (GSAP)
 js/plan.js        tarla planı ekranı: mevcut rotasyon (ekim dönemleri), toprak, su, eğim, öncelikler; yanıtlar cihazda saklanır
 js/profile.js     tarla profili PROTOTİPİ (#profile): kayıtlı tarla ve rotasyon, "Bu yıl için önerimiz" kartı, aylık tarla notu; "Örnek profili aç" düğmesi (hazır örnek: Konya, buğday + nadas, "Örnek" etiketli üç not); hesap/şifre/e-posta yok, veriler yalnızca tarayıcıda (localStorage "deco-profile")
@@ -119,7 +122,7 @@ Gösterge renklerini ve açıklamadaki renk adlarını katmanın resmi renk skal
 - Kuru tarımda, ürünün tarladaki ilk iki ayında 30 mm'den az yağış düşüyorsa ürün alternatif olarak önerilmez.
   Kışlık ekim yalnızca o yerin en soğuk ayından 2 ila 4 ay önce başlayabilir (hemen önceki ay hariç); en soğuk ayı 15°C'nin üstünde olan
   yerde kış yok sayılır. Bu eşikler de ekibin seçimidir ve yalnızca altı yerde denenmiştir.
-- Stratejiler iki alternatif üretemezse "Başka bir olasılık" kartları gösterilir; bunlar öneri değil, karşılaştırmadır.
+- Stratejiler iki alternatif üretemezse eksik kartın yerinde "Neden üç kart yok?" açıklaması çıkar ve "Başka fikirler" bölümü açık başlar (eski "Başka bir olasılık" kartları kaldırıldı).
 - ECOCROP çeşit farkını bilmez; örneğin serin yaylalarda yerel mısır çeşitleri "sınırda" görünebilir.
 - Aynı aile kuralı kabadır: su altında yetişen çeltik ile kuru tarlada yetişen buğdayın hastalık ve zararlıları çoğunlukla
   farklıdır, ama kural ikisini aynı aileden sayar.

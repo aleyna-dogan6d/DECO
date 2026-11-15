@@ -1,12 +1,13 @@
 # DECO
 
-**Crop rotation decisions with NASA data.** (DECO: from crop rotation DECisiOn.)
+**Crop rotation decisions with NASA data.** (DECO: DEcision support for CrOp rotation.)
 NASA Space Apps Challenge 2026 · Field Shift challenge. *(Türkçe: [README.tr.md](README.tr.md))*
 
-**Live site:** _link will be added here after publishing_
+**Live site:** https://aleyna-dogan6d.github.io/DECO/
+**Code:** https://github.com/aleyna-dogan6d/DECO
 
 DECO lets a farmer pick their field anywhere in the world, see 25 years of NASA satellite and climate
-data for that area, describe what they grow today, and compare their current rotation with two alternatives.
+data for that area, describe what they grow today, and compare their current rotation with up to three alternatives.
 Every option shows why it was produced, the evidence behind it, its benefits, what we do not know, and its risks.
 
 The tool supports the farmer's decision; it does not replace it. Every card tells the farmer to talk to a
@@ -17,30 +18,32 @@ crop growth model. Satellite and reanalysis data describe the region around a fi
 
 ## How it answers the challenge
 
-- **At least three rotations, including the current one:** the farmer's own rotation plus up to two alternatives.
-  If the rules cannot produce two alternatives, the page says so and explains why.
-- **For each rotation:** a one-sentence plain summary, six scores, "Why this option?", "Compared with yours",
-  "Evidence" (with the data source), "Information gaps" and "Risks".
-- **Plain language first:** every number has an "In other words" sentence; technical terms, sources and years
+- **At least three rotations, including the current one:** the farmer's own rotation plus up to three alternatives.
+  If the rules find fewer than two alternatives, the page says why and opens the "More ideas" section (up to three
+  two-crop rotations for the area).
+- **For each rotation:** a one-sentence plain summary, six scores, "Evidence" (with the data source),
+  "Information gaps" and "Risks"; alternatives also show "Why this option?" and "Compared with yours".
+- **Plain language first:** the main numbers on each screen come with an "In other words" sentence; technical terms, sources and years
   are in a collapsible "Science details" box. The site is available in English and Turkish.
 - **Works worldwide:** no region is hard-coded. We tested with Konya (Türkiye), Kingston (Jamaica),
   Seville (Spain), Ludhiana (India), Nakuru (Kenya) and Ames (Iowa, USA).
 
 ## How to use it
 
-The site has four pages: Home, Plan my field (the tool itself), From the Field (farmers' comments; no comments
-yet and no invented ones; the comment form is not open yet) and About us. There is also a **prototype** "My field"
-profile page (see below). The steps below happen on "Plan my field".
+The site has four pages: Home, Plan my field (the tool itself), From the Field (farmers' comments) and About us.
+There are no real farmer comments yet and the comment form is not open yet; the page shows three example cards,
+each labelled "Example comment (for testing) — not from a real farmer", to show how the section will look.
+There is also a **prototype** "My field" profile page (see below). The steps below happen on "Plan my field".
 
 1. **Choose your field:** search for a place, press "Use my location", or click on the map.
 2. **Play the past:** pick a NASA layer (plants, soil moisture, rain, temperature, groundwater) and press play to
    watch 2001–2026.
 3. **Describe your field:** your current rotation (crop, sowing month, harvest month; fallow is allowed), soil
    type, water (irrigated / limited / rain-fed), slope, your priorities, and the crops you can sell easily.
-4. **Compare three rotations:** your rotation and up to two alternatives, each with scores, evidence,
+4. **Compare rotations:** your rotation and up to three alternatives, each with scores, evidence,
    information gaps and risks.
 5. **Ask "What if the climate changes?":** move the temperature (0 to +3°C) and rain (−30% to +10%) sliders. The
-   same three cards are re-scored; changed scores and new risks are marked.
+   same cards are re-scored; changed scores and new risks are marked.
 6. **Look into an option:** every card has a "Look into this option" button. It opens a panel with, for each of
    the six criteria, the score, the rule and the data behind it (only numbers the engine really calculates; no
    yield, fertiliser or seed amounts), a year-by-year transition calendar from the current rotation, the risks
@@ -50,12 +53,14 @@ profile page (see below). The steps below happen on "Plan my field".
 **"My field" profile (prototype).** A farmer can save the selected field and the current rotation, see the
 highest-scoring card for the saved field ("Our suggestion for this year": the same rule-based engine run again,
 not a forecast), and keep a short monthly field note (date, how the soil feels: dry / normal / wet, free text).
-There is no account, no password and no e-mail. Everything stays in the browser and can be deleted with one button.
+There is no account, no password and no e-mail. The profile stays in the browser and can be deleted with one button.
 The notes are not used in any calculation yet. **To look at it quickly, open "My field" and press "Try a demo
 profile":** one click loads a ready-made example (Konya, wheat + fallow, three notes marked "Sample"); the demo data
 are examples and do not belong to a real farmer.
 
-Answers and the profile are stored only in the browser (localStorage). Nothing the farmer enters is sent to a server.
+Answers and the profile are stored only in the browser (localStorage) and are not sent to any server. To fetch data,
+only the coordinates of the selected point (and the place name typed in the search) are sent to NASA POWER and to
+OpenStreetMap's Nominatim.
 
 ## NASA data used
 
@@ -265,6 +270,12 @@ The licence covers our code only. Libraries loaded from CDNs keep their own lice
 Chart.js MIT, GSAP "Standard no charge license", which is not an open-source licence). The **data** shown by the site are not ours and are used under their own
 terms: NASA GIBS and NASA POWER data, FAO ECOCROP and other FAO material, and OpenStreetMap data (ODbL) remain
 subject to the conditions of their providers, listed under "Sources and attributions".
+
+## Use of AI
+
+No AI model runs in the site; the comparison is rule-based. In development: we used AI assistants (Anthropic's
+Claude) to help write code and documentation; all design decisions, data choices and checks were made and
+reviewed by the team.
 
 ## Team
 

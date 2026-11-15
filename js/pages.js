@@ -8,6 +8,19 @@ const ROUTES = ["home", "plan", "farmers", "about", "profile"]; // "profile": ta
 // açıklaması görünür; dolunca düğme "Yorum yaz →" olur ve formu yeni sekmede açar.
 const COMMENT_FORM_URL = "";
 
+// "Tarladan" sayfasındaki ÖRNEK yorumlar (ekip kararı, 15 Kasım 2026): gerçek yorum gelene kadar bölümün nasıl
+// görüneceğini gösterir. Başlık ve metin Türkçe modda da İNGİLİZCE gösterilir (ekip düzeltmesi; çevirisi kullanılmaz);
+// üstteki not ve her karttaki "örnek" etiketi arayüz metnidir ve dile göre değişir (js/i18n.js: farmersExampleNote,
+// farmersExampleLabel). Gerçek kişi adı ve fotoğraf YOK. Metinler ekibin verdiği hâliyle; değiştirmeden önce sor.
+const FARMER_EXAMPLES = [
+  { who: "Example farmer — Konya, Türkiye · Wheat → Fallow",
+    text: "The idea of lentils instead of a fallow year caught my eye. I'd like to try it on a small plot first and ask my adviser about seed." },
+  { who: "Example farmer — Ludhiana, India · Rice → Wheat",
+    text: "The water-saving card matters most to me; groundwater here gets deeper every year. I'd also like to see pumping hours on the card." },
+  { who: "Example farmer — Kingston, Jamaica · Maize → Cowpea",
+    text: "I'd like to see local crops like yam and callaloo in the list." }
+];
+
 // Ana sayfadaki örnek: Konya, kuru tarım, buğday (Eki–Tem) → nadas; su 4, toprak 5, gelir 2; kolay satılan: buğday, mercimek.
 // Puanlar bu yanıtlarla uygulamanın verdiği gerçek puanlardır (14 Kasım 2026). Kurallar ya da ağırlıklar değişirse
 // burası da güncellenmeli; test betiği (a4 kipi) bu sayıları motorun sonucuyla karşılaştırır.
@@ -85,14 +98,14 @@ const Router = {
     });
     if (el("profileLink")) { if (r === "profile") el("profileLink").setAttribute("aria-current", "page"); else el("profileLink").removeAttribute("aria-current"); }
     if (r === "profile") Profile.show(); // kayıtlı profil ya da oluşturma formu; öneri kartı için iklim verisi istenir
+    window.scrollTo(0, 0); // her sayfa baştan açılır (telefonda plan sayfası da belge olarak kayar)
     if (r === "plan") {
       // Harita ilk açılışta kurulur; sonraki dönüşlerde boyutu yeniden ölçtürülür (gizliyken boyutunu bilemez)
       startMap();
       MapView.map.invalidateSize();
       renderLayerList();
-    } else {
-      if (prev === "plan") setPlaying(false); // başka sayfaya geçince "Geçmişi oynat" durur
-      window.scrollTo(0, 0);
+    } else if (prev === "plan") {
+      setPlaying(false); // başka sayfaya geçince "Geçmişi oynat" durur
     }
     Pages.onRoute(r, prev);
   }
@@ -152,6 +165,26 @@ const Pages = {
       value.textContent = `${fmt(row.score, 1)} / 5`;
       score.append(note, value);
       box.append(label, bar, score);
+    });
+
+    // ÖRNEK yorum kartları (ekip kararı, 15 Kasım 2026): gerçek yorum yokken bölümün nasıl görüneceğini gösterir.
+    // Her kartta görünür bir "örnek" etiketi vardır; gerçek kişi adı ve fotoğraf yoktur. Metinler ekibin verdiği
+    // hâliyle i18n.js'tedir (farmersExamples); gerçek yorumlar gelince bu kartlar onlarla KARIŞTIRILMAMALI.
+    const examples = el("farmersExamples");
+    examples.innerHTML = "";
+    FARMER_EXAMPLES.forEach(c => {
+      const card = document.createElement("article"), label = document.createElement("p"), who = document.createElement("p"), text = document.createElement("blockquote");
+      card.className = "example-card";
+      label.className = "example-label";
+      label.textContent = t("farmersExampleLabel"); // etiket arayüz metnidir: dile göre değişir
+      who.className = "example-who";
+      who.lang = "en"; // başlık ve metin iki dilde de İngilizce gösterilir
+      who.textContent = c.who;
+      text.className = "example-text";
+      text.lang = "en";
+      text.textContent = `“${c.text}”`;
+      card.append(label, who, text);
+      examples.appendChild(card);
     });
 
     // Yorum formu (ekip kararı, 15 Kasım 2026): adres varsa "Yorum yaz →" düğmesi forma gider (yeni sekmede);
@@ -240,8 +273,14 @@ const Pages = {
     this.render();     // sayarken yarıda kalmış sayılar son hâline döner
   },
 
+  // Üst çubuğun yüksekliği CSS'e bildirilir: telefonda ana sayfa panelleri üst çubuğun hemen altına yapışır
+  measure() {
+    document.documentElement.style.setProperty("--topbar-h", `${document.querySelector(".topbar").offsetHeight}px`);
+  },
+
   animate(route) {
     this.stopMotion();
+    this.measure();
     const story = el("homeStory");
     // Sahne yalnızca masaüstünde ve hareket serbestken yerinde durur; mobilde kareler alt alta düz bölümlerdir
     const pinned = route === "home" && this.motionOK() && !isMobile();
@@ -296,10 +335,12 @@ const Pages = {
           .from(frame.querySelector(".frame-copy"), { autoAlpha: 0, y: 30, duration: 0.4 }, i + 0.1);
       });
       tl.to({}, { duration: 0.7 });
-    } else {
+    } else if (!isMobile()) {
       frames.slice(1).forEach(frame =>
         gsap.from(frame.querySelector(".frame-copy"), { autoAlpha: 0, y: 24, duration: 0.6, ease: "power2.out", scrollTrigger: { trigger: frame, start: "top 78%" } }));
     }
+    // Telefonda kareler üst üste gelen panellerdir (css/style.css, position: sticky); geçiş kaydırmanın kendisidir,
+    // yazılar ayrıca canlandırılmaz (bir tetikleyici kaçarsa yazının görünmez kalması riski olmasın diye).
 
     // Rotasyon şeritleri soldan uzar; puanlar ve sayılar sıfırdan sayar (React Bits "CountUp"tan esinlenildi)
     gsap.from("#homeStrips .ex-bar span", { scaleX: 0, duration: 0.6, ease: "power2.out", stagger: 0.06, scrollTrigger: { trigger: "#homeStrips", start: "top 82%" } });
@@ -319,6 +360,7 @@ const Pages = {
 window.addEventListener("resize", () => {
   clearTimeout(Pages._resize);
   Pages._resize = setTimeout(() => {
+    Pages.measure();
     if (Router.current !== "home") return;
     const want = Pages.motionOK() && !isMobile() ? "pinned" : "stacked";
     if (want !== Pages.mode) Pages.animate("home");

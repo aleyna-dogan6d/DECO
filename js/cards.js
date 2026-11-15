@@ -1,4 +1,4 @@
-// Aşama 3: rotasyon kartları (mevcut rotasyon + en fazla iki alternatif).
+// Aşama 3: rotasyon kartları (mevcut rotasyon + en fazla üç alternatif).
 // Aşama 4: "gelecek iklim" kaydırıcıları açıkken aynı kartlar kaydırılmış iklimle yeniden puanlanır
 // (kartlardaki rotasyonlar sabit kalır; yalnızca puanlar ve riskler güncellenir).
 // Hesap js/rotation.js ve js/future.js'te; burada yalnızca metinler seçilir ve kartlar çizilir.
