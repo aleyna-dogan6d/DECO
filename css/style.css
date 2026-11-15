@@ -886,3 +886,52 @@ h2.mid { margin: 36px 0 8px; font-size: 22px; font-weight: 800; letter-spacing: 
   .fc-nav .btn { flex: 1 1 0; }
   .dash-check { order: 3; }
 }
+
+/* ---------- Eğitim sayfası (#education) ve ana sayfadaki iki yönlendirme bloğu ---------- */
+.edu-body { border-top: 0; padding-top: 44px; }
+.edu-card { margin: 0 0 14px; border: 1px solid rgba(22, 33, 27, .3); border-top: 4px solid var(--green); border-radius: 4px; background: var(--card); }
+.edu-card > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 14px 16px; cursor: pointer; list-style: none; }
+.edu-card > summary::-webkit-details-marker { display: none; }
+.edu-card > summary::after { content: "+"; margin-left: auto; font-size: 24px; font-weight: 700; line-height: 1; color: var(--green); }
+.edu-card[open] > summary::after { content: "\2212"; }
+.edu-card > summary:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.edu-k { font-size: 12.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--green-dark); }
+.edu-name { font-size: 20px; font-weight: 800; letter-spacing: -.2px; }
+.edu-in { padding: 2px 16px 18px; border-top: 1px solid rgba(22, 33, 27, .16); }
+.edu-in h3 { margin: 14px 0 4px; font-size: 15.5px; font-weight: 800; }
+.edu-in p { margin: 0; line-height: 1.55; max-width: 820px; }
+.edu-in ol { margin: 14px 0 4px; padding-left: 22px; line-height: 1.55; max-width: 820px; }
+.edu-in ol li { margin-bottom: 6px; }
+.edu-in .edu-src { margin-top: 14px; font-size: 13.5px; color: var(--muted); }
+.edu-src a { color: var(--green-dark); }
+.edu-soon { padding: 18px 16px; border: 1px dashed rgba(22, 33, 27, .4); border-radius: 4px; background: #e6e3da; color: #55605a; font-weight: 600; text-align: center; }
+.band-ctas { padding-top: 44px; padding-bottom: 44px; }
+.home-ctas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.home-cta-box { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 20px; border: 1px solid rgba(22, 33, 27, .3); border-top: 4px solid var(--green); border-radius: 4px; background: var(--card); }
+.home-cta-box p { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.4; }
+.home-cta-box .cta { margin-top: auto; }
+/* Eğitim bağlantısı: geniş ekranda menüdeki sekme; telefonda (menü satırına sığmadığı için) dil seçicinin yanında */
+.edu-link { display: none; }
+/* Plan sayfasında 861–1099 px: arama kutusuna yer kalsın diye Eğitim sekmesi gizlenir (diğer sayfalardan ulaşılır) */
+@media (min-width: 861px) and (max-width: 1099px) {
+  html[data-route="plan"] .tabs .tab-edu { display: none; }
+}
+/* Telefon (860 px altı): beşinci sekme menü satırına sığmaz (satır taşıyor, sekme kesiliyordu), bu yüzden satıra hiç
+   girmez. Plan dışındaki sayfalarda, 375 px ve üstünde, dil seçicinin yanındaki bağlantı görünür ("Profilim" gibi).
+   Telefonda plan sayfasında (üst satırda konum düğmesi var, yer yok) ve 375 px'ten dar ekranda bağlantı görünmez;
+   Eğitim sayfasına ana sayfadaki "Öğren →" düğmesinden ve diğer sayfaların üst çubuğundan gidilir. */
+@media (max-width: 860px) {
+  .tabs .tab-edu { display: none; }
+}
+@media (min-width: 375px) and (max-width: 860px) {
+  html:not([data-route="plan"]) .edu-link { display: inline-flex; padding: 0 6px; }
+  html:not([data-route="plan"]) .edu-link + .profile-link { margin-left: 0; }
+}
+@media (max-width: 860px) {
+  .edu-body { padding-top: 26px; }
+  .edu-name { font-size: 18px; }
+  .band-ctas { padding-top: 30px; padding-bottom: 30px; }
+  .home-ctas { grid-template-columns: 1fr; gap: 12px; }
+  .home-cta-box { padding: 16px; }
+  .home-cta-box p { font-size: 16.5px; }
+}

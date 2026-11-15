@@ -2,7 +2,7 @@
 // Sayfalar: Ana sayfa (#home), Tarlamı planla (#plan; uygulamanın kendisi), Çiftçiler (#farmers), Hakkımızda (#about).
 // Hepsi tek HTML dosyasındadır; adresin "#" kısmına göre yalnızca biri görünür. Uygulama (harita ve plan) değişmedi.
 
-const ROUTES = ["home", "plan", "farmers", "about", "profile"]; // "profile": tarla profili prototipi (js/profile.js)
+const ROUTES = ["home", "plan", "farmers", "about", "profile", "education"]; // "profile": tarla profili prototipi (js/profile.js); "education": eğitim modülleri (metinleri index.html + i18n.js)
 
 // "Tarladan" sayfasındaki yorum formunun (Google Form) adresi. Ekip verince TIRNAKLARIN ARASINA yazılır
 // (https:// ile başlamalı). Boşken sayfada çalışmayan bir "Yakında" düğmesi ve "Yorum formu yakında açılacak"
@@ -101,6 +101,9 @@ const Router = {
     el("pageAbout").hidden = r !== "about";
     // (Profil bölümü ve bağlantısı için "varsa" denetimi: tarayıcı eski bir index.html'i önbellekten açmışsa site bozulmasın)
     if (el("pageProfile")) el("pageProfile").hidden = r !== "profile";
+    if (el("pageEducation")) el("pageEducation").hidden = r !== "education";
+    // Eğitim bağlantısı telefonda menü satırına sığmadığı için dil seçicinin yanında da durur (#eduLink)
+    if (el("eduLink")) { if (r === "education") el("eduLink").setAttribute("aria-current", "page"); else el("eduLink").removeAttribute("aria-current"); }
     document.querySelectorAll("#tabs .tab").forEach(a => {
       if (a.dataset.route === r) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -319,7 +322,8 @@ const Pages = {
     if (route === "plan" || !this.motionOK()) return;
 
     gsap.registerPlugin(ScrollTrigger);
-    const page = el({ home: "pageHome", farmers: "pageFarmers", about: "pageAbout", profile: "pageProfile" }[route]);
+    const page = el({ home: "pageHome", farmers: "pageFarmers", about: "pageAbout", profile: "pageProfile", education: "pageEducation" }[route]);
+    if (!page) return;
     this.ctx = gsap.context(() => {
       if (route === "home") this.animateHome(pinned);
       // Bölümlerin hafifçe yukarı kayarak belirmesi (React Bits "FadeContent" / "AnimatedContent"ten esinlenildi)

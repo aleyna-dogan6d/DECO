@@ -6,13 +6,13 @@
   <meta name="ai-disclosure" content="Code, documentation and the crop data build script were written with AI assistance (Anthropic Claude, via Claude Code) and reviewed and edited by the team. No AI model runs in the site; no AI-generated images are used.">
   <title>DECO — Crop rotation decisions with NASA data</title>
   <!-- Sayfa adresine göre hangi bölümün görüneceği, sayfa çizilmeden önce belirlenir (titreme olmasın diye) -->
-  <script>document.documentElement.dataset.route = ["plan", "farmers", "about", "profile"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "home";</script>
+  <script>document.documentElement.dataset.route = ["plan", "farmers", "about", "profile", "education"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "home";</script>
   <!-- Sekme simgesi: logodaki yeşil yaprak (ayrı dosya yok; tarayıcının favicon.ico araması 404 vermesin diye) -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 22c5-3 8-7 8-12a8 8 0 0 0-16 0c0 5 3 9 8 12z' fill='%231f6f43'/%3E%3Cpath d='M12 18V9m0 4l-3-2m3 0l3-3' stroke='%23fff' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <!-- Sürüm eki (?v=...): tarayıcı eski css/js dosyasını önbellekten kullanmasın diye. Bir css ya da js dosyası
        değişince bu sayfadaki BÜTÜN ?v= değerlerini aynı yeni değerle değiştirin (ör. 20261115j). Dosya adları değişmez. -->
-  <link rel="stylesheet" href="css/style.css?v=20261115j">
+  <link rel="stylesheet" href="css/style.css?v=20261115m">
 </head>
 <body>
   <!-- Renk süzgeci: kırmızı ve mavi bileşenleri yer değiştirir. Yeraltı suyu katmanında kullanılır (css/style.css). -->
@@ -37,6 +37,7 @@
       <a class="tab" href="#plan" data-route="plan" data-i18n="navPlan">Plan my field</a>
       <a class="tab" href="#farmers" data-route="farmers" data-i18n="navFarmers">From the Field</a>
       <a class="tab" href="#about" data-route="about" data-i18n="navAbout">About us</a>
+      <a class="tab tab-edu" href="#education" data-route="education" data-i18n="navEducation">Education</a>
     </nav>
 
     <!-- Sağ grup: (yalnızca plan sayfasında) arama ve konum, dil. Menü sekmeleri ortada durur. -->
@@ -50,6 +51,8 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5" fill="currentColor"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2"/></svg>
         <span data-i18n="locate">Use my location</span>
       </button>
+      <!-- Eğitim bağlantısı: yalnızca telefonda (menü satırına sığmadığı için dil seçicinin yanında); geniş ekranda menüdeki sekme görünür -->
+      <a class="profile-link edu-link" id="eduLink" href="#education" data-i18n="navEducation">Education</a>
       <!-- Tarla profili (prototip): her sayfada görünür -->
       <a class="profile-link" id="profileLink" href="#profile" data-i18n="navProfile">My field</a>
       <select id="langSel" class="lang" aria-label="Language">
@@ -383,6 +386,20 @@
       </div>
     </section>
 
+    <!-- İki küçük yönlendirme bloğu (ekip isteği, 15 Kasım 2026): 5 dakikalık tarla testi ve eğitim modülleri -->
+    <section class="band band-ctas">
+      <div class="home-ctas" id="homeCtas">
+        <div class="home-cta-box">
+          <p data-i18n="homeTestText">Take the 5-minute field test and see the results for your own field.</p>
+          <a class="cta cta-small" href="#plan" data-i18n="homeTestBtn">Start →</a>
+        </div>
+        <div class="home-cta-box">
+          <p data-i18n="homeEduText">Education is really important to us. Use our free education modules.</p>
+          <a class="cta cta-small" href="#education" data-i18n="homeEduBtn">Learn →</a>
+        </div>
+      </div>
+    </section>
+
     <section class="band">
       <div class="steps4" id="homeSteps">
         <div><b>1</b><h3 data-i18n="homeStep1">Find your field</h3><p data-i18n="homeStep1Text">Search, tap the map, or use your location.</p></div>
@@ -403,6 +420,70 @@
       <h2 class="big reveal" data-i18n="homeEndTitle">See it for your own field.</h2>
       <a class="cta reveal" href="#plan" data-i18n="homeCta">Plan my field →</a>
       <p class="fine" data-i18n="homeEndNote">Data: NASA GIBS, NASA POWER, FAO ECOCROP, © OpenStreetMap contributors. Satellite data describe the region around a field, not the single field.</p>
+    </section>
+  </div>
+
+  <!-- ================= Eğitim (#education): üç kısa modül. Metinler ekibin verdiği hâliyle (js/i18n.js, edu…). ================= -->
+  <div class="page" id="pageEducation" hidden>
+    <section class="band band-dark page-hero">
+      <div class="wrap">
+        <p class="kicker" data-i18n="navEducation">Education</p>
+        <h1 class="big" data-i18n="eduTitle">Learn with DECO</h1>
+        <p class="page-hero-text" data-i18n="eduLead">Short, free modules for farmers. Education is really important to us.</p>
+      </div>
+    </section>
+    <section class="band edu-body">
+      <div class="wrap">
+        <!-- Her modül tıklayınca açılan/kapanan bir karttır (details); ilki açık başlar -->
+        <details class="edu-card" open>
+          <summary><span class="edu-k" data-i18n="eduK1">Module 1</span><span class="edu-name" data-i18n="eduM1Title">What is crop rotation?</span></summary>
+          <div class="edu-in">
+            <h3 data-i18n="eduHWhat">What it is</h3>
+            <p data-i18n="eduM1What">Crop rotation means growing different crops on the same field in a planned order over seasons and years, instead of the same crop every year.</p>
+            <h3 data-i18n="eduHWhy">Why it is needed</h3>
+            <p data-i18n="eduM1Why">Different crops take different nutrients and water from the soil and root at different depths. Pests and diseases that attack one plant family build up when that family is grown year after year. Bare soil between crops is washed away by rain.</p>
+            <h3 data-i18n="eduHBenefits">Benefits</h3>
+            <p data-i18n="eduM1Benefits">Fewer pest and disease cycles. Legumes such as lentil, chickpea, bean, pea and vetch work with soil bacteria to take nitrogen from the air. More months with the soil covered means less erosion. Growing several crops spreads the risk of one bad season.</p>
+            <h3 data-i18n="eduHStart">How to start</h3>
+            <p data-i18n="eduM1Start">Write down what you grow now. Avoid the same plant family back to back. Try a legume or a cover crop in the empty period. Choose crops that fit your season's rain and temperature. Change one thing at a time, on a small plot first, and ask a local adviser.</p>
+            <p class="edu-src"><span data-i18n="eduSource">Source:</span> <a href="https://www.fao.org/conservation-agriculture/en/" target="_blank" rel="noopener">FAO, Conservation Agriculture</a></p>
+          </div>
+        </details>
+
+        <details class="edu-card">
+          <summary><span class="edu-k" data-i18n="eduK2">Module 2</span><span class="edu-name" data-i18n="eduM2Title">Climate change and your farm</span></summary>
+          <div class="edu-in">
+            <h3 data-i18n="eduHWhat">What it is</h3>
+            <p data-i18n="eduM2What">The Earth's average surface temperature in 2011–2020 was about 1.1 °C higher than in 1850–1900, mainly because of greenhouse gases from human activity.</p>
+            <h3 data-i18n="eduHAffects">How it affects farms</h3>
+            <p data-i18n="eduM2Affects">Warmer air makes crops lose more water, so the same rain goes less far. In many regions rain is becoming less regular, with heavier downpours and longer dry spells. Frost dates and growing seasons shift. Heat during flowering can lower yields, and some pests reach new areas.</p>
+            <h3 data-i18n="eduHDo">What farmers can do</h3>
+            <p data-i18n="eduM2Do">Choose crops and sowing dates that fit the new conditions, keep the soil covered to hold water, use more varied rotations and use water carefully.</p>
+            <h3 data-i18n="eduHDeco">How DECO helps</h3>
+            <p data-i18n="eduM2Deco">It shows 25 years of NASA data for the area around your field, and its climate sliders let you test a rotation in a warmer, drier climate before you plant.</p>
+            <p class="edu-src"><span data-i18n="eduSources">Sources:</span> <!-- IPCC adresi (https://www.ipcc.ch/report/ar6/syr/) 15 Kasım 2026'da otomatik denetimde açılmadı (403 / "Just a moment…"); ekip kuralı gereği bağlantı kaldırıldı, kaynak adı düz yazı --><span id="eduSrcIpcc">IPCC Sixth Assessment Report</span><span id="eduSrcSep">; </span><a id="eduSrcNasa" href="https://science.nasa.gov/climate-change/" target="_blank" rel="noopener">NASA Climate</a></p>
+          </div>
+        </details>
+
+        <details class="edu-card">
+          <summary><span class="edu-k" data-i18n="eduK3">Module 3</span><span class="edu-name" data-i18n="eduM3Title">How to use DECO</span></summary>
+          <div class="edu-in">
+            <!-- İlk beş adım Hakkımızda sayfasındaki "Nasıl kullanılır" adımlarının aynısıdır (aboutHow1…5) -->
+            <ol>
+              <li data-i18n="aboutHow1">Choose your field: on the "Plan my field" page, search for a place, press "Use my location" or click on the map.</li>
+              <li data-i18n="aboutHow2">Look at the past: pick a NASA layer and press "Play the past". The field card shows a 2001–2024 rain and temperature summary for your area.</li>
+              <li data-i18n="aboutHow3">Describe your field: press "Create a plan for this field" and enter your current rotation (crop, sowing month, harvest month), soil, water, slope, your priorities and the crops you can sell easily.</li>
+              <li data-i18n="aboutHow4">Compare rotations: your own rotation next to up to three alternatives. "Look into this option" shows how the scores came out and a transition calendar.</li>
+              <li data-i18n="aboutHow5">Move the "What if the climate changes?" sliders; if you like, save your field on the "My field" page and keep a monthly note. Talk to a local agricultural adviser before you decide.</li>
+              <li data-i18n="eduM3Step6">Not sure about your soil? Use the 5-minute field check in the form.</li>
+              <li data-i18n="eduM3Step7">Save your field in My field to see this year's suggestion and keep monthly notes.</li>
+            </ol>
+            <a class="cta cta-small" href="#plan" data-i18n="homeCta">Plan my field →</a>
+          </div>
+        </details>
+
+        <div class="edu-soon" data-i18n="eduSoon">More modules coming soon.</div>
+      </div>
     </section>
   </div>
 
@@ -499,7 +580,7 @@
       <ul class="plain-list" id="aboutFuture">
         <li data-i18n="aboutFuture1">Real accounts, so that a profile can be opened from other devices (for now the profile is a prototype that lives only in the browser).</li>
         <li data-i18n="aboutFuture2">Improving the rules with farmers' notes and comments.</li>
-        <li data-i18n="aboutFuture3">Training modules: short, plain explanations of crop rotation and soil health.</li>
+        <li data-i18n="aboutFuture3">More education modules, for example on soil health (three short modules are already on the Education page).</li>
         <li data-i18n="aboutFuture4">Taking the slope automatically from SRTM and the soil type from SoilGrids (we have not tried these two sources yet).</li>
         <li data-i18n="aboutFuture5">More crops.</li>
         <li data-i18n="aboutFuture6">Sowing-time alerts based on short-term weather forecasts (Meteomatics).</li>
@@ -531,18 +612,18 @@
        sayfasında kullanılmaz. Yüklenemezse site animasyonsuz çalışır. Lisans: gsap.com/standard-license (README'de yazıyor). -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/ScrollTrigger.min.js"></script>
-  <script src="js/i18n.js?v=20261115j"></script>
-  <script src="js/layers.js?v=20261115j"></script>
-  <script src="js/map.js?v=20261115j"></script>
-  <script src="js/field.js?v=20261115j"></script>
-  <script src="js/crops.js?v=20261115j"></script>
-  <script src="js/calendar.js?v=20261115j"></script>
-  <script src="js/rotation.js?v=20261115j"></script>
-  <script src="js/future.js?v=20261115j"></script>
-  <script src="js/cards.js?v=20261115j"></script>
-  <script src="js/plan.js?v=20261115j"></script>
-  <script src="js/profile.js?v=20261115j"></script>
-  <script src="js/pages.js?v=20261115j"></script>
-  <script src="js/app.js?v=20261115j"></script>
+  <script src="js/i18n.js?v=20261115m"></script>
+  <script src="js/layers.js?v=20261115m"></script>
+  <script src="js/map.js?v=20261115m"></script>
+  <script src="js/field.js?v=20261115m"></script>
+  <script src="js/crops.js?v=20261115m"></script>
+  <script src="js/calendar.js?v=20261115m"></script>
+  <script src="js/rotation.js?v=20261115m"></script>
+  <script src="js/future.js?v=20261115m"></script>
+  <script src="js/cards.js?v=20261115m"></script>
+  <script src="js/plan.js?v=20261115m"></script>
+  <script src="js/profile.js?v=20261115m"></script>
+  <script src="js/pages.js?v=20261115m"></script>
+  <script src="js/app.js?v=20261115m"></script>
 </body>
 </html>
